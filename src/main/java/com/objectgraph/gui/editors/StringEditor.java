@@ -66,7 +66,7 @@ public class StringEditor extends EditorPane {
 
 	@Override
 	public boolean canEdit(RootedProperty model) {
-		return model.getValue() instanceof String;
+		return model.getValueType(false).equals(String.class);
 	}
 
 }

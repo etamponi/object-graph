@@ -56,7 +56,9 @@ public class PluginManager {
 			try {
 				URL url = file.toURI().toURL();
 				urls.add(url);
-			} catch (MalformedURLException e) {}
+			} catch (MalformedURLException e) {
+                // Do not do anything
+            }
 		}
 		classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
 		Set<String> packages = new HashSet<>();
@@ -78,7 +80,9 @@ public class PluginManager {
 				try {
 					T obj = type.newInstance();
 					ret.add(obj);
-				} catch (InstantiationException | IllegalAccessException e) {}
+				} catch (InstantiationException | IllegalAccessException e) {
+                    // Do not do anything: the class does not have an empty constructor
+                }
 			}
 		}
 		

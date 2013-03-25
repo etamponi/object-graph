@@ -1,0 +1,5 @@
+The Object-Graph Framework for event-driven programming
+
+This project contains the classes to develop fully event-driven systems. The API
+ provides an handful of classes to provide event dispatch and handling, plugin
+ management, and automatic GUI generation.

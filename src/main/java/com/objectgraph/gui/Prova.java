@@ -2,6 +2,8 @@ package com.objectgraph.gui;
 
 
 
+import com.objectgraph.pluginsystem.PluginConfiguration;
+import com.objectgraph.pluginsystem.PluginManager;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -79,7 +81,8 @@ public class Prova {
 	}
 
 	public static void main(String[] args) {
-		Application.launch(MyApp.class);
+        PluginManager.initialise(new PluginConfiguration("com.objectgraph"));
+        Application.launch(MyApp.class);
 		node.detachAllEditors();
 		int i = 1;
 		ProvaNode node = new ProvaNode();

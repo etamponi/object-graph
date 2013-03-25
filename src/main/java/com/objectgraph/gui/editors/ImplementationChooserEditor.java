@@ -138,7 +138,7 @@ public class ImplementationChooserEditor extends EditorPane {
 
 	@Override
 	public boolean canEdit(RootedProperty model) {
-		return !ClassUtils.isConcrete(model.getValueType(false)); 
+		return !ClassUtils.isConcrete(model.getValueType(false));
 	}
 
 }
