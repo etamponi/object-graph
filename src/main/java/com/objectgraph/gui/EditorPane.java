@@ -2,6 +2,8 @@ package com.objectgraph.gui;
 
 import java.io.IOException;
 
+import com.objectgraph.core.exceptions.EditorNotDetachedException;
+import com.objectgraph.core.exceptions.InvalidModelForEditorException;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
@@ -37,10 +39,10 @@ public abstract class EditorPane extends AnchorPane implements Initializable, Pr
 		}
 		
 		if (!canEdit(model)) {
-			// TODO throw exception
+			throw new InvalidModelForEditorException();
 		}
 		if (this.model != null) {
-			// TODO Throw exception
+			throw new EditorNotDetachedException();
 		}
 		this.model = model;
 		updateView();

@@ -513,9 +513,7 @@ public abstract class Node {
 	 * @return
 	 */
 	public <T extends PropertyEditor> T attachEditor(String property, T editor) {
-		RootedProperty model = new RootedProperty(this, property);
-		editor.setModel(model);
-		PropertyEditorRegistry.register(editor, this);
+		PropertyEditorRegistry.register(editor, this, property);
 		return editor;
 	}
 	

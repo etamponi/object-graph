@@ -11,7 +11,9 @@ class PropertyEditorRegistry {
 	
 	private static final Map<PropertyEditor, Node> registry = new WeakHashMap<>();
 	
-	static void register(PropertyEditor editor, Node node) {
+	static void register(PropertyEditor editor, Node node, String property) {
+        RootedProperty model = new RootedProperty(node, property);
+        editor.setModel(model);
 		registry.put(editor, node);
 	}
 	
