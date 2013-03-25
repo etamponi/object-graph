@@ -1,2 +1,4 @@
 *.bak
 /target/
+/.idea/
+object-graph.iml
