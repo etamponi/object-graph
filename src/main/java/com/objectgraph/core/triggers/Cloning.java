@@ -34,13 +34,13 @@ public class Cloning extends StaticControlledPathTrigger<Node> {
 		Object content = getNode().get(masterPath);
 		if (PathUtils.samePrefix(event.getPath(), masterPath)) {
 			for(String path: getControlledPaths()) {
-				Object clone = content instanceof Node ? ((Node)content).copy() : Node.getKryo().copy(content);
+				Object clone = Node.getKryo().copy(content);
 				getNode().set(path, clone);
 			}
 		} else {
 			for(String path: getControlledPaths()) {
 				if (PathUtils.samePrefix(event.getPath(), path)) {
-					Object clone = content instanceof Node ? ((Node)content).copy() : Node.getKryo().copy(content);
+					Object clone = Node.getKryo().copy(content);
 					getNode().set(path, clone);
 				}
 			}

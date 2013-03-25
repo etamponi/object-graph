@@ -118,11 +118,11 @@ public class ObjectNodeTest {
 		
 		PluginManager.setConfiguration(new PluginConfiguration("com.objectgraph"));
 		assertEquals(2, base.getPossiblePropertyValues("property3").size());
-		
-		Node copy = base.property3.copy();
+
+		Node copy = Node.getKryo().copy(base.property3);
 		assertEquals(3, copy.getFreeProperties().size());
 		assertEquals(2, base.property3.getFreeProperties().size());
-		copy = base.copy();
+		copy = Node.getKryo().copy(base);
 		assertEquals(2, copy.get("property3", Node.class).getFreeProperties().size());
 	}
 

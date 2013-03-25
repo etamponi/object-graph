@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.objectgraph.core.Node;
 import org.reflections.Reflections;
 
 import com.objectgraph.utils.ClassUtils;
@@ -33,12 +34,12 @@ public class PluginManager {
 	}
 	
 	public static void setConfiguration(PluginConfiguration conf) {
-		configuration = conf.copy();
+		configuration = Node.getKryo().copy(conf);
 		prepare();
 	}
 	
 	public static PluginConfiguration getConfiguration() {
-		return configuration.copy();
+		return Node.getKryo().copy(configuration);
 	}
 	
 	public static ClassLoader getClassLoader() {

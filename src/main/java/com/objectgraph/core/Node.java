@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.esotericsoftware.kryo.DefaultSerializer;
 import org.objenesis.instantiator.ObjectInstantiator;
 import org.objenesis.strategy.InstantiatorStrategy;
 import org.objenesis.strategy.StdInstantiatorStrategy;
@@ -93,6 +94,8 @@ public abstract class Node {
 					return super.newInstantiator(type);
 			}
 		};
+        kryo.addDefaultSerializer(Node.class, NodeSerializer.class);
+        kryo.addDefaultSerializer(ListNode.class, NodeSerializer.class);
 		kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
 	}
 	
@@ -501,17 +504,6 @@ public abstract class Node {
 			for(String parentPath: getParentPaths().get(parent))
 				parent.getConstraints(PathUtils.appendPath(parentPath, path), list, seen.plus(parent));
 		}
-	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public <N extends Node> N copy() {
-		// TODO Replace this with a regular implementation of KryoSerializer or KryoCopyable
-		N ret = (N) getKryo().copy(this);
-		ParentRegistry.registerTree(ret);
-		return ret;
 	}
 	
 	/**

@@ -13,7 +13,6 @@ import com.esotericsoftware.kryo.serializers.FieldSerializer;
 import com.objectgraph.core.eventtypes.changes.ListChange;
 import com.objectgraph.core.eventtypes.changes.ListChange.ListChangeType;
 
-@DefaultSerializer(FieldSerializer.class)
 public class ListNode<E> extends Node implements List<E> {
 	
 	private final List<E> list = new ArrayList<>();
