@@ -116,7 +116,7 @@ public class ObjectNodeTest {
 		assertEquals(NodeExampleChild.class, base.getPropertyType("property3", false));
 		assertEquals(NodeChildSubclass.class, base.getPropertyType("property3", true));
 		
-		PluginManager.setConfiguration(new PluginConfiguration("com.objectgraph"));
+		PluginManager.initialize(new PluginConfiguration("com.objectgraph"));
 		assertEquals(2, base.getPossiblePropertyValues("property3").size());
 
 		Node copy = Node.getKryo().copy(base.property3);

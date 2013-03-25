@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.objectgraph.core.Node;
+import com.objectgraph.pluginsystem.exceptions.PluginManagerAlreadyInitializedException;
+import com.objectgraph.pluginsystem.exceptions.PluginManagerNotInitializedException;
 import org.reflections.Reflections;
 
 import com.objectgraph.utils.ClassUtils;
@@ -19,26 +21,26 @@ import com.objectgraph.utils.ClassUtils;
 
 public class PluginManager {
 	
-	private static PluginConfiguration configuration = new PluginConfiguration("com.objectgraph");
-	
+	private static PluginConfiguration configuration = null;
 	private static ClassLoader classLoader = PluginManager.class.getClassLoader();
-	
-	private static Reflections internal;
-
-	static {
-		prepare();
-	}
+	private static Reflections internal = null;
 	
 	private PluginManager() {
 		// you should not instantiate a PluginManager
 	}
 	
-	public static void setConfiguration(PluginConfiguration conf) {
+	public static void initialize(PluginConfiguration conf) {
+        if (configuration != null)
+            throw new PluginManagerAlreadyInitializedException();
+
 		configuration = Node.getKryo().copy(conf);
 		prepare();
 	}
 	
 	public static PluginConfiguration getConfiguration() {
+        if (configuration == null)
+            throw new PluginManagerNotInitializedException();
+
 		return Node.getKryo().copy(configuration);
 	}
 	
@@ -56,7 +58,7 @@ public class PluginManager {
 				urls.add(url);
 			} catch (MalformedURLException e) {}
 		}
-		classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), classLoader);
+		classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
 		Set<String> packages = new HashSet<>();
 		for(String p: configuration.packages) {
 			if (p != null)
