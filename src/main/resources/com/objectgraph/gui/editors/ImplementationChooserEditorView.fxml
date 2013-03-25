@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns:fx="http://javafx.com/fxml">
+  <children>
+    <GridPane id="GridPane" hgap="5.0" vgap="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <children>
+        <ComboBox fx:id="implementationBox" maxWidth="+Infinity" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+          <items>
+            <FXCollections fx:factory="observableArrayList">
+              <String fx:value="Item 1" />
+              <String fx:value="Item 2" />
+              <String fx:value="Item 3" />
+            </FXCollections>
+          </items>
+        </ComboBox>
+        <Button fx:id="editButton" mnemonicParsing="false" text="Edit" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="1" />
+        <Button fx:id="commitButton" mnemonicParsing="false" text="Commit" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="0" />
+        <Button id="cancelButon" fx:id="cancelButton" mnemonicParsing="false" text="Cancel" GridPane.columnIndex="2" GridPane.hgrow="NEVER" GridPane.rowIndex="0" />
+        <Button fx:id="loadButton" mnemonicParsing="false" text="Load" GridPane.columnIndex="2" GridPane.hgrow="NEVER" GridPane.rowIndex="1" />
+      </children>
+      <columnConstraints>
+        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+        <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
+        <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
+      </columnConstraints>
+      <rowConstraints>
+        <RowConstraints minHeight="10.0" valignment="CENTER" vgrow="ALWAYS" />
+        <RowConstraints minHeight="10.0" valignment="CENTER" vgrow="ALWAYS" />
+      </rowConstraints>
+    </GridPane>
+  </children>
+</AnchorPane>
