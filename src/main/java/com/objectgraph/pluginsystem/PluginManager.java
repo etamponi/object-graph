@@ -29,7 +29,7 @@ public class PluginManager {
 		// you should not instantiate a PluginManager
 	}
 	
-	public static void initialize(PluginConfiguration conf) {
+	public static void initialise(PluginConfiguration conf) {
         if (configuration != null)
             throw new PluginManagerAlreadyInitializedException();
 

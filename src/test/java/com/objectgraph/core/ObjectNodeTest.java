@@ -49,6 +49,7 @@ public class ObjectNodeTest {
 			});
 			
 			addErrorCheck(new ErrorCheck<NodeExampleBase>() {
+
 				@Override
 				public Error getError() {
 					if ("enabled".equals(getNode().property2))
@@ -56,6 +57,7 @@ public class ObjectNodeTest {
 					else
 						return new Error(ErrorLevel.WARNING, "property2: still not set to \"enabled\"");
 				}
+
 			});
 		}
 	}
@@ -116,7 +118,7 @@ public class ObjectNodeTest {
 		assertEquals(NodeExampleChild.class, base.getPropertyType("property3", false));
 		assertEquals(NodeChildSubclass.class, base.getPropertyType("property3", true));
 		
-		PluginManager.initialize(new PluginConfiguration("com.objectgraph"));
+		PluginManager.initialise(new PluginConfiguration("com.objectgraph"));
 		assertEquals(2, base.getPossiblePropertyValues("property3").size());
 
 		Node copy = Node.getKryo().copy(base.property3);
