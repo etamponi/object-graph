@@ -14,4 +14,6 @@ public interface PropertyEditor {
 	
 	public boolean canEdit(RootedProperty model);
 
+    public Class<?> getBaseEditableType();
+
 }

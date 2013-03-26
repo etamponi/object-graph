@@ -474,6 +474,7 @@ public abstract class Node {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public List<?> getPossiblePropertyValues(String property) {
+        // TODO put this as a method of PluginManager
 		if (!hasProperty(property))
 			throw new PropertyNotExistsException(new RootedProperty(this, property));
 
@@ -513,6 +514,7 @@ public abstract class Node {
 	 * @return
 	 */
 	public <T extends PropertyEditor> T attachEditor(String property, T editor) {
+        // TODO throw exception
 		PropertyEditorRegistry.register(editor, this, property);
 		return editor;
 	}
@@ -522,6 +524,7 @@ public abstract class Node {
 	 * @param editor
 	 */
 	public void detachEditor(PropertyEditor editor) {
+        // TODO throw exception
 		PropertyEditorRegistry.unregister(editor, this);
 	}
 	
@@ -531,5 +534,9 @@ public abstract class Node {
 	public void detachAllEditors() {
 		PropertyEditorRegistry.unregisterAll(this);
 	}
+
+    public <T extends PropertyEditor> T getBestEditor(String property) {
+        return (T)PluginManager.getBestEditor(new RootedProperty(this, property));
+    }
 	
 }

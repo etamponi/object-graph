@@ -72,4 +72,16 @@ public class RootedProperty {
 		return root.get().getPossiblePropertyValues(path);
 	}
 
+    public <T extends PropertyEditor> T getBestEditor() {
+        return root.get().getBestEditor(path);
+    }
+
+    public <T extends PropertyEditor> T attachEditor(T editor) {
+        return root.get().attachEditor(path, editor);
+    }
+
+    public void detachEditor(PropertyEditor editor) {
+        root.get().detachEditor(editor);
+    }
+
 }
