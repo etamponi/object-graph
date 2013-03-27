@@ -8,9 +8,7 @@ import com.objectgraph.core.Node;
 import com.objectgraph.core.ObjectNode;
 import com.objectgraph.core.triggers.Assignment;
 import com.objectgraph.gui.editors.ImplementationChooserEditor;
-import com.objectgraph.gui.editors.NumberEditor;
 import com.objectgraph.gui.editors.StringEditor;
-import com.objectgraph.gui.editors.TextFieldBasedEditor;
 import com.objectgraph.pluginsystem.PluginConfiguration;
 import com.objectgraph.pluginsystem.PluginManager;
 import javafx.application.Application;
@@ -29,6 +27,12 @@ public class Prova {
         protected String s;
         @Property
         protected int i;
+        @Property
+        protected double d;
+        @Property
+        protected float f;
+        @Property
+        protected short sh;
         @Property
         protected Node node;
 
@@ -64,7 +68,12 @@ public class Prova {
         public void start(Stage stage) throws Exception {
             EditorPane editor1 = node.attachEditor("s", new StringEditor());
             EditorPane editor2 = node.attachEditor("s", new StringEditor());
-            EditorPane editor4 = node.attachEditor("i", new NumberEditor());
+            EditorPane[] editors = {
+                    (EditorPane)node.attachEditor("i", node.getBestEditor("i")),
+                    (EditorPane)node.attachEditor("d", node.getBestEditor("d")),
+                    (EditorPane)node.attachEditor("f", node.getBestEditor("f")),
+                    (EditorPane)node.attachEditor("sh", node.getBestEditor("sh")),
+            };
             EditorPane editor3 = node.attachEditor("node", new ImplementationChooserEditor());
 
             VBox box = new VBox();
@@ -75,7 +84,8 @@ public class Prova {
                     node.set("s", "Automatic message");
                 }
             });
-            box.getChildren().addAll(editor1, editor2, editor4, editor3, test);
+            box.getChildren().addAll(editor1, editor2, editor3, test);
+            box.getChildren().addAll(editors);
 
             Scene scene = new Scene(box);
             scene.getStylesheets().add("com/objectgraph/gui/objectgraphgui.css");

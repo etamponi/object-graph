@@ -22,7 +22,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class ImplementationChooserEditor extends EditorPane<Object> {
+public class ImplementationChooserEditor extends EditorPane<Void> {
 
     @FXML
     private ComboBox<Object> implementationBox;

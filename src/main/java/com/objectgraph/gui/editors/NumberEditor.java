@@ -19,21 +19,35 @@ package com.objectgraph.gui.editors;/*
 
 import com.objectgraph.core.RootedProperty;
 
-public class NumberEditor extends TextFieldBasedEditor<Number> {
+public class NumberEditor extends TextFieldBasedEditor<Object> {
+
     @Override
     protected Number fromTextToModel(String text) {
-        return Integer.parseInt(text);
+        Class<?> type = getModel().getValueType(true);
+        if (type == byte.class || type == Byte.class)
+            return Byte.parseByte(text);
+        if (type == short.class || type == Short.class)
+            return Short.parseShort(text);
+        if (type == int.class || type == Integer.class)
+            return Integer.parseInt(text);
+        if (type == long.class || type == Long.class)
+            return Long.parseLong(text);
+        if (type == float.class || type == Float.class)
+            return Float.parseFloat(text);
+        if (type == double.class || type == Double.class)
+            return Double.parseDouble(text);
+        return null; // cannot happen
     }
 
     @Override
-    protected String fromModelToText(Number value) {
+    protected String fromModelToText(Object value) {
         return String.valueOf(value);
     }
 
     @Override
     protected boolean isValid(String text) {
         try {
-            Integer.parseInt(text);
+            fromTextToModel(text);
         } catch (NumberFormatException e) {
             return false;
         }
