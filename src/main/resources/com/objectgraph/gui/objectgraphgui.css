@@ -1,0 +1,14 @@
+
+.text-field-editor {
+    -fx-font-weight: normal;
+}
+
+.text-field-editor-changed {
+    -fx-control-inner-background: #ffff66;
+    -fx-font-weight: normal;
+}
+
+.text-field-editor-invalid {
+    -fx-text-fill: #ff0000;
+    -fx-font-weight: bold;
+}

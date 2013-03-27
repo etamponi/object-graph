@@ -136,8 +136,6 @@ public class ImplementationChooserEditor extends EditorPane<Object> {
             implementationBox.getItems().add(NULLCONTENT);
             implementationBox.getItems().addAll(implementations);
             implementationBox.getSelectionModel().selectFirst();
-
-//            editButton.setDisable(current == null);
         }
     }
 

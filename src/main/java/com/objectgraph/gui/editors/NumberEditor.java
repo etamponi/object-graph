@@ -19,24 +19,29 @@ package com.objectgraph.gui.editors;/*
 
 import com.objectgraph.core.RootedProperty;
 
-public class StringEditor extends TextFieldBasedEditor<String> {
+public class NumberEditor extends TextFieldBasedEditor<Number> {
     @Override
-    protected String fromTextToModel(String text) {
-        return text;
+    protected Number fromTextToModel(String text) {
+        return Integer.parseInt(text);
     }
 
     @Override
-    protected String fromModelToText(String value) {
-        return value == null ? "" : value;
+    protected String fromModelToText(Number value) {
+        return String.valueOf(value);
     }
 
     @Override
     protected boolean isValid(String text) {
+        try {
+            Integer.parseInt(text);
+        } catch (NumberFormatException e) {
+            return false;
+        }
         return true;
     }
 
     @Override
     public boolean canEdit(RootedProperty model) {
-        return model.getValueType(false).equals(String.class);
+        return true;
     }
 }
