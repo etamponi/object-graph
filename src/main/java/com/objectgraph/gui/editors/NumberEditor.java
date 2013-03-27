@@ -17,7 +17,10 @@ package com.objectgraph.gui.editors;/*
  * along with object-graph.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import com.google.common.collect.Sets;
 import com.objectgraph.core.RootedProperty;
+
+import java.util.Set;
 
 public class NumberEditor extends TextFieldBasedEditor<Object> {
 
@@ -54,8 +57,11 @@ public class NumberEditor extends TextFieldBasedEditor<Object> {
         return true;
     }
 
+    private static final Set<?> supported = Sets.newHashSet(
+            byte.class, Byte.class, short.class, Short.class, int.class, Integer.class,
+            long.class, Long.class, float.class, Float.class, double.class, Double.class);
     @Override
     public boolean canEdit(RootedProperty model) {
-        return true;
+        return supported.contains(model.getValueType(true));
     }
 }
