@@ -34,6 +34,8 @@ public class Prova {
         @Property
         protected short sh;
         @Property
+        protected boolean b;
+        @Property
         protected Node node;
 
         public ProvaNode() {
@@ -73,6 +75,7 @@ public class Prova {
                     (EditorPane)node.attachEditor("d", node.getBestEditor("d")),
                     (EditorPane)node.attachEditor("f", node.getBestEditor("f")),
                     (EditorPane)node.attachEditor("sh", node.getBestEditor("sh")),
+                    (EditorPane)node.attachEditor("b", node.getBestEditor("b"))
             };
             EditorPane editor3 = node.attachEditor("node", new ImplementationChooserEditor());
 
@@ -104,12 +107,13 @@ public class Prova {
         Application.launch(MyApp.class);
         node.detachAllEditors();
         System.out.println(node.getErrors());
+        System.out.println(node.b);
         int i = 1;
         ProvaNode node = new ProvaNode();
         provaParent(node);
         while (node.getFreeProperties().size() != node.getProperties().size()) {
             System.out.println(i++);
-            if (i > 1000)
+            if (i > 2)
                 System.gc();
         }
 
