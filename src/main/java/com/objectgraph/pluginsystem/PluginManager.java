@@ -8,8 +8,8 @@ import java.util.*;
 
 import com.objectgraph.core.Constraint;
 import com.objectgraph.core.Node;
-import com.objectgraph.core.PropertyEditor;
 import com.objectgraph.core.RootedProperty;
+import com.objectgraph.gui.PropertyEditor;
 import com.objectgraph.pluginsystem.exceptions.PluginManagerAlreadyInitializedException;
 import com.objectgraph.pluginsystem.exceptions.PluginManagerNotInitializedException;
 import org.reflections.Reflections;
@@ -22,7 +22,7 @@ public class PluginManager {
 	private static PluginConfiguration configuration = null;
 	private static ClassLoader classLoader = PluginManager.class.getClassLoader();
 	private static Reflections internal = null;
-	
+
 	private PluginManager() {
 		// you should not instantiate a PluginManager
 	}
@@ -97,8 +97,12 @@ public class PluginManager {
 		return ret;
 	}
 
-    private static final Map<Class<?>, Class<PropertyEditor>> cachedEditors = new HashMap<>();
     public static PropertyEditor getBestEditor(RootedProperty model) {
+        return getBestEditor(model, false);
+    }
+
+    private static final Map<Class<?>, Class<PropertyEditor>> cachedEditors = new HashMap<>();
+    public static PropertyEditor getBestEditor(RootedProperty model, boolean attach) {
         Class<?> valueType = model.getValueType(true);
         if (cachedEditors.containsKey(valueType)) try {
             PropertyEditor cached = cachedEditors.get(valueType).newInstance();
@@ -120,7 +124,10 @@ public class PluginManager {
 
         cachedEditors.put(valueType, (Class<PropertyEditor>)best.getClass());
 
-        return best;
+        if (attach)
+            return best.attach(model);
+        else
+            return best;
     }
 
     private static PropertyEditor updateBestEditor(Class<?> valueType, PropertyEditor current, PropertyEditor candidate) {

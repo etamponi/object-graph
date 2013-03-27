@@ -1,5 +1,7 @@
 package com.objectgraph.core;
 
+import com.objectgraph.utils.PathUtils;
+
 public class Event {
 
     private final String path;
@@ -25,10 +27,7 @@ public class Event {
     }
 
     public Event backPropagate(String parent) {
-        if (path.isEmpty())
-            return new Event(parent, type);
-        else
-            return new Event(parent + "." + path, type);
+        return new Event(PathUtils.appendPath(parent, path), type);
     }
 
 }

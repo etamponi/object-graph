@@ -7,8 +7,8 @@ import com.objectgraph.core.MapNode;
 import com.objectgraph.core.Node;
 import com.objectgraph.core.ObjectNode;
 import com.objectgraph.core.triggers.Assignment;
-import com.objectgraph.gui.editors.ImplementationChooserEditor;
-import com.objectgraph.gui.editors.StringEditor;
+import com.objectgraph.gui.editors.ImplementationChooserPropertyEditor;
+import com.objectgraph.gui.editors.StringPropertyEditor;
 import com.objectgraph.pluginsystem.PluginConfiguration;
 import com.objectgraph.pluginsystem.PluginManager;
 import javafx.application.Application;
@@ -68,16 +68,16 @@ public class Prova {
     public static class MyApp extends Application {
         @Override
         public void start(Stage stage) throws Exception {
-            EditorPane editor1 = node.attachEditor("s", new StringEditor());
-            EditorPane editor2 = node.attachEditor("s", new StringEditor());
-            EditorPane[] editors = {
-                    (EditorPane)node.attachEditor("i", node.getBestEditor("i")),
-                    (EditorPane)node.attachEditor("d", node.getBestEditor("d")),
-                    (EditorPane)node.attachEditor("f", node.getBestEditor("f")),
-                    (EditorPane)node.attachEditor("sh", node.getBestEditor("sh")),
-                    (EditorPane)node.attachEditor("b", node.getBestEditor("b"))
+            PropertyEditor editor1 = new StringPropertyEditor().attach(node.getProperty("s"));
+            PropertyEditor editor2 = new StringPropertyEditor().attach(node.getProperty("s"));
+            PropertyEditor[] editors = {
+                    PluginManager.getBestEditor(node.getProperty("i"), true),
+                    PluginManager.getBestEditor(node.getProperty("d"), true),
+                    PluginManager.getBestEditor(node.getProperty("f"), true),
+                    PluginManager.getBestEditor(node.getProperty("sh"), true),
+                    PluginManager.getBestEditor(node.getProperty("b"), true),
             };
-            EditorPane editor3 = node.attachEditor("node", new ImplementationChooserEditor());
+            PropertyEditor editor3 = new ImplementationChooserPropertyEditor().attach(node.getProperty("node"));
 
             VBox box = new VBox();
             Button test = new Button("Automatic");
@@ -105,7 +105,6 @@ public class Prova {
     public static void main(String[] args) {
         PluginManager.initialise(new PluginConfiguration("com.objectgraph"));
         Application.launch(MyApp.class);
-        node.detachAllEditors();
         System.out.println(node.getErrors());
         System.out.println(node.b);
         int i = 1;

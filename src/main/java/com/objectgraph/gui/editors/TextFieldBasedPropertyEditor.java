@@ -2,7 +2,7 @@ package com.objectgraph.gui.editors;
 
 import com.objectgraph.core.Event;
 import com.objectgraph.core.eventtypes.changes.SetProperty;
-import com.objectgraph.gui.EditorPane;
+import com.objectgraph.gui.PropertyEditor;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -14,7 +14,7 @@ import javafx.scene.control.TextField;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public abstract class TextFieldBasedEditor<T> extends EditorPane<T> {
+public abstract class TextFieldBasedPropertyEditor<T> extends PropertyEditor<T> {
 
     @FXML
     protected TextField textField;
@@ -23,7 +23,7 @@ public abstract class TextFieldBasedEditor<T> extends EditorPane<T> {
     @FXML
     protected Button cancelButton;
 
-    public TextFieldBasedEditor() {
+    public TextFieldBasedPropertyEditor() {
         super("TextFieldBasedEditorView.fxml");
     }
 

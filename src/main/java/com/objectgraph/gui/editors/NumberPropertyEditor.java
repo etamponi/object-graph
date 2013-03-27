@@ -22,7 +22,7 @@ import com.objectgraph.core.RootedProperty;
 
 import java.util.Set;
 
-public class NumberEditor extends TextFieldBasedEditor<Object> {
+public class NumberPropertyEditor extends TextFieldBasedPropertyEditor<Object> {
 
     @Override
     protected Number fromTextToModel(String text) {

@@ -1,6 +1,7 @@
 package com.objectgraph.gui;
 
-import com.objectgraph.core.PropertyEditor;
+import com.objectgraph.core.Event;
+import com.objectgraph.core.EventManager;
 import com.objectgraph.core.RootedProperty;
 import com.objectgraph.core.exceptions.EditorNotDetachedException;
 import com.objectgraph.core.exceptions.InvalidModelForEditorException;
@@ -8,15 +9,17 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.layout.AnchorPane;
+import org.pcollections.PSet;
 
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 
-public abstract class EditorPane<T> extends AnchorPane implements Initializable, PropertyEditor {
+public abstract class PropertyEditor<T> extends AnchorPane implements Initializable, EventManager {
 
     private RootedProperty model;
+    private boolean listening = true;
 
-    public EditorPane(String fxmlFile) {
+    public PropertyEditor(String fxmlFile) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
             loader.setController(this);
@@ -32,10 +35,10 @@ public abstract class EditorPane<T> extends AnchorPane implements Initializable,
         }
     }
 
-    public void setModel(RootedProperty model) {
+    public PropertyEditor<T> attach(RootedProperty model) {
         if (model == null) {
-            this.model = null;
-            return;
+            detach();
+            return this;
         }
 
         if (!canEdit(model)) {
@@ -44,16 +47,44 @@ public abstract class EditorPane<T> extends AnchorPane implements Initializable,
         if (this.model != null) {
             throw new EditorNotDetachedException();
         }
+
+        model.getRoot().addParentPath(this, "");
         this.model = model;
+
         updateView();
+
+        return this;
     }
+
+    public void detach() {
+        if (model != null) {
+            model.getRoot().removeParentPath(this, "");
+        }
+    }
+
+    public abstract void updateModel();
+
+    public abstract boolean requiresViewUpdate(Event event);
+
+    public abstract void updateView();
+
+    public abstract boolean canEdit(RootedProperty model);
 
     public RootedProperty getModel() {
         return model;
     }
 
-    @Override
     public Class<?> getBaseEditableType() {
         return (Class<?>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     }
+
+    @Override
+    public void handleEvent(Event e, PSet<EventManager> seen) {
+        if (listening && requiresViewUpdate(e)) {
+            listening = false;
+            updateView();
+            listening = true;
+        }
+    }
+
 }

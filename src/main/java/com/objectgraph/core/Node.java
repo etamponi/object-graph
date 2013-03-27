@@ -2,7 +2,6 @@ package com.objectgraph.core;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.objectgraph.core.eventtypes.changes.SetProperty;
-import com.objectgraph.core.exceptions.NodeHelperAlreadyUsedException;
 import com.objectgraph.core.exceptions.MalformedPathException;
 import com.objectgraph.core.exceptions.PropertyNotExistsException;
 import com.objectgraph.pluginsystem.PluginManager;
@@ -63,9 +62,7 @@ import java.util.*;
  *
  * @author Emanuele Tamponi
  */
-public abstract class Node {
-
-//	private final Map<Node, Set<String>> parentPaths = new WeakHashMap<>();
+public abstract class Node implements EventManager {
 
     private final Set<Trigger<?>> triggers = new HashSet<>();
 
@@ -134,29 +131,19 @@ public abstract class Node {
      * @param parent   the parent Node
      * @param property the name of the property that connects the parent to this Node
      */
-    protected void addParentPath(Node parent, String property) {
-//		if (!parentPaths.containsKey(parent)) {
-//			parentPaths.put(parent, new HashSet<String>());
-//		}
-//		parentPaths.get(parent).add(property);
+    public void addParentPath(EventManager parent, String property) {
         ParentRegistry.register(parent, property, this);
     }
 
     /**
      * Removes a previously defined parent Node
      * <p/>
-     * See {@link #addParentPath(Node, String)} for a definition of parent Nodes.
+     * See {@link #addParentPath(EventManager, String)} for a definition of parent Nodes.
      *
      * @param parent   the parent Node to remove from the parent list
      * @param property the name of the property that connects the parent to this Node
      */
-    protected void removeParentPath(Node parent, String property) {
-//		Set<String> properties = parentPaths.get(parent);
-//		if (properties != null) {
-//			properties.remove(property);
-//			if (properties.isEmpty())
-//				parentPaths.remove(parent);
-//		}
+    public void removeParentPath(EventManager parent, String property) {
         ParentRegistry.unregister(parent, property, this);
     }
 
@@ -273,11 +260,11 @@ public abstract class Node {
      */
     public List<String> getControlledProperties() {
         List<String> ret = new ArrayList<>();
-        getControlledProperties(ret, "", HashTreePSet.<Node>singleton(this));
+        getControlledProperties("", ret, HashTreePSet.<Node>singleton(this));
         return ret;
     }
 
-    private void getControlledProperties(List<String> controlled, String prefixPath, PSet<Node> seen) {
+    private void getControlledProperties(String prefixPath, List<String> controlled, PSet<Node> seen) {
         for (Trigger<?> t : triggers) {
             for (String path : t.getControlledPaths()) {
                 if (PathUtils.isParent(prefixPath, path))
@@ -285,18 +272,20 @@ public abstract class Node {
             }
         }
 
-        for (Node parent : getParentPaths().keySet()) {
-            if (seen.contains(parent))
-                continue;
-            for (String path : getParentPaths().get(parent))
-                parent.getControlledProperties(controlled, PathUtils.appendPath(path, prefixPath), seen.plus(parent));
+        for (EventManager p : getParentPaths().keySet()) {
+            if (p instanceof Node && !seen.contains(p)) {
+                Node parent = (Node)p;
+                for (String path : getParentPaths().get(parent))
+                    parent.getControlledProperties(PathUtils.appendPath(path, prefixPath), controlled, seen.plus(parent));
+            }
+
         }
     }
 
     /**
      * @return
      */
-    protected Map<Node, Set<String>> getParentPaths() {
+    public Map<EventManager, Set<String>> getParentPaths() {
         return ParentRegistry.getParentPaths(this);
     }
 
@@ -304,22 +293,19 @@ public abstract class Node {
      * @param e
      */
     protected void fireEvent(Event e) {
-        fireEvent(e, HashTreePSet.<Node>singleton(this));
+        handleEvent(e, HashTreePSet.<EventManager>singleton(this));
     }
 
-    private void fireEvent(Event e, PSet<Node> seen) {
-        for (PropertyEditor editor : PropertyEditorRegistry.getAttachedEditors(this))
-            if (editor.requiresViewUpdate(e))
-                editor.updateView();
-
+    @Override
+    public void handleEvent(Event e, PSet<EventManager> seen) {
         for (Trigger<?> t : triggers)
             t.check(e);
 
-        for (Node parent : getParentPaths().keySet()) {
+        for (EventManager parent : getParentPaths().keySet()) {
             if (seen.contains(parent))
                 continue;
             for (String path : getParentPaths().get(parent))
-                parent.fireEvent(e.backPropagate(path), seen.plus(parent));
+                parent.handleEvent(e.backPropagate(path), seen.plus(parent));
         }
     }
 
@@ -442,7 +428,7 @@ public abstract class Node {
             throw new PropertyNotExistsException(new RootedProperty(this, property));
 
         List<Constraint<?, ?>> list = new ArrayList<>();
-        getConstraints(property, list, HashTreePSet.<Node>empty());
+        getConstraints(property, list, HashTreePSet.<EventManager>empty());
 
         return PluginManager.getImplementations(getPropertyType(property, false), list);
     }
@@ -452,46 +438,24 @@ public abstract class Node {
      * @param list
      * @param seen
      */
-    private void getConstraints(String path, List<Constraint<?, ?>> list, PSet<Node> seen) {
+    public void getConstraints(String path, List<Constraint<?, ?>> list, PSet<EventManager> seen) {
         if (constraints.containsKey(path))
             list.addAll(constraints.get(path));
 
-        for (Node parent : getParentPaths().keySet()) {
-            if (seen.contains(parent))
-                continue;
-            for (String parentPath : getParentPaths().get(parent))
-                parent.getConstraints(PathUtils.appendPath(parentPath, path), list, seen.plus(parent));
+        for (EventManager p : getParentPaths().keySet()) {
+            if (p instanceof Node && !seen.contains(p)) {
+                Node parent = (Node)p;
+                for (String parentPath : getParentPaths().get(parent))
+                    parent.getConstraints(PathUtils.appendPath(parentPath, path), list, seen.plus(parent));
+            }
         }
     }
 
-    /**
-     * @param property
-     * @param editor
-     * @return
-     */
-    public <T extends PropertyEditor> T attachEditor(String property, T editor) {
+    public RootedProperty getProperty(String property) {
+        RootedProperty ret = new RootedProperty(this, property);
         if (!hasProperty(property))
-            throw new PropertyNotExistsException(new RootedProperty(this, property));
-        PropertyEditorRegistry.register(editor, this, property);
-        return editor;
-    }
-
-    /**
-     * @param editor
-     */
-    public void detachEditor(PropertyEditor editor) {
-        PropertyEditorRegistry.unregister(editor, this);
-    }
-
-    /**
-     *
-     */
-    public void detachAllEditors() {
-        PropertyEditorRegistry.unregisterAll(this);
-    }
-
-    public <T extends PropertyEditor> T getBestEditor(String property) {
-        return (T) PluginManager.getBestEditor(new RootedProperty(this, property));
+            throw new PropertyNotExistsException(ret);
+        return ret;
     }
 
 }

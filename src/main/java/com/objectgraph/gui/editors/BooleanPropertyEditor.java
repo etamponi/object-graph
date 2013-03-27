@@ -21,7 +21,7 @@ package com.objectgraph.gui.editors;
 
 import com.objectgraph.core.Event;
 import com.objectgraph.core.RootedProperty;
-import com.objectgraph.gui.EditorPane;
+import com.objectgraph.gui.PropertyEditor;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -30,12 +30,12 @@ import javafx.scene.control.CheckBox;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class BooleanEditor extends EditorPane<Object> {
+public class BooleanPropertyEditor extends PropertyEditor<Object> {
 
     @FXML
     private CheckBox checkBox;
 
-    public BooleanEditor() {
+    public BooleanPropertyEditor() {
         super("BooleanEditorView.fxml");
     }
 

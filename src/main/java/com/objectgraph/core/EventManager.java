@@ -1,4 +1,4 @@
-package com.objectgraph.gui.editors;/*
+package com.objectgraph.core;/*
  * Copyright 2013 emanuele
  *
  * This file is part of object-graph.
@@ -17,26 +17,10 @@ package com.objectgraph.gui.editors;/*
  * along with object-graph.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import com.objectgraph.core.RootedProperty;
+import org.pcollections.PSet;
 
-public class StringEditor extends TextFieldBasedEditor<String> {
-    @Override
-    protected String fromTextToModel(String text) {
-        return text;
-    }
+public interface EventManager {
 
-    @Override
-    protected String fromModelToText(String value) {
-        return value == null ? "" : value;
-    }
+    public void handleEvent(Event e, PSet<EventManager> seen);
 
-    @Override
-    protected boolean isValid(String text) {
-        return true;
-    }
-
-    @Override
-    public boolean canEdit(RootedProperty model) {
-        return model.getValueType(false).equals(String.class);
-    }
 }

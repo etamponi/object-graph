@@ -3,7 +3,8 @@ package com.objectgraph.gui.editors;
 import com.objectgraph.core.Event;
 import com.objectgraph.core.RootedProperty;
 import com.objectgraph.core.eventtypes.changes.SetProperty;
-import com.objectgraph.gui.EditorPane;
+import com.objectgraph.gui.PropertyEditor;
+import com.objectgraph.pluginsystem.PluginManager;
 import com.objectgraph.utils.ClassUtils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -22,7 +23,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class ImplementationChooserEditor extends EditorPane<EditorPane> {
+public class ImplementationChooserPropertyEditor extends PropertyEditor<PropertyEditor> {
 
     @FXML
     private ComboBox<Object> implementationBox;
@@ -51,7 +52,7 @@ public class ImplementationChooserEditor extends EditorPane<EditorPane> {
         }
     }
 
-    public ImplementationChooserEditor() {
+    public ImplementationChooserPropertyEditor() {
         super("ImplementationChooserEditorView.fxml");
     }
 
@@ -107,11 +108,14 @@ public class ImplementationChooserEditor extends EditorPane<EditorPane> {
         // TODO Create a specific Stage subclass
         Stage stage = new Stage();
 
-        EditorPane best = (EditorPane)getModel().attachEditor(getModel().getBestEditor());
+        PropertyEditor best = PluginManager.getBestEditor(getModel());
         System.out.println(best);
-        stage.setScene(new Scene(best));
-
-        stage.showAndWait();
+        if (best != null) {
+            stage.setScene(new Scene(best));
+            best.attach(getModel());
+            stage.showAndWait();
+            best.detach();
+        }
     }
 
     @Override
