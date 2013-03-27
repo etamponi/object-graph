@@ -29,13 +29,16 @@ public class Prova {
         protected Node node;
 
         public ProvaNode() {
-            addConstraint("node", new Constraint<ProvaNode, Node>() {
+            addConstraint(new Constraint<ProvaNode, Node>("node") {
                 @Override
-                protected boolean check(Node element) {
-                    if (Strings.nullToEmpty(getNode().s).equals("Automatic message"))
-                        return element instanceof MapNode;
-                    else
-                        return true;
+                protected String check(Node element) {
+                    if (Strings.nullToEmpty(getNode().s).equals("Automatic message")) {
+                        if (element instanceof MapNode)
+                            return null;
+                        else
+                            return "should be an instance of MapNode";
+                    } else
+                        return null;
                 }
             });
         }
@@ -82,6 +85,7 @@ public class Prova {
         PluginManager.initialise(new PluginConfiguration("com.objectgraph"));
         Application.launch(MyApp.class);
         node.detachAllEditors();
+        System.out.println(node.getErrors());
         int i = 1;
         ProvaNode node = new ProvaNode();
         provaParent(node);

@@ -104,6 +104,7 @@ public class ImplementationChooserEditor extends EditorPane<Object> {
     }
 
     private void openSpecificEditor() {
+        // TODO Create a specific Stage subclass
         Stage stage = new Stage();
 
         EditorPane best = (EditorPane)getModel().attachEditor(getModel().getBestEditor());

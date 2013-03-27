@@ -6,6 +6,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
 
+import com.objectgraph.core.Constraint;
 import com.objectgraph.core.Node;
 import com.objectgraph.core.PropertyEditor;
 import com.objectgraph.core.RootedProperty;
@@ -66,7 +67,7 @@ public class PluginManager {
 		internal = new Reflections(classLoader, packages.toArray(new String[packages.size()]));
 	}
 	
-	public static <T> List<T> getImplementations(Class<T> baseType) {
+	public static <T> List<T> getImplementations(Class<T> baseType, List<Constraint<?,?>> constraints) {
 		List<T> ret = new ArrayList<>();
 		
 		Set<Class<? extends T>> types = internal.getSubTypesOf(baseType);
@@ -82,6 +83,9 @@ public class PluginManager {
                 }
 			}
 		}
+
+        for(Constraint<?,?> c: constraints)
+            c.filter((List) ret);
 		
 		Collections.sort(ret, new Comparator<T>() {
 			@Override
@@ -105,7 +109,7 @@ public class PluginManager {
             System.exit(1);
         }
 
-        List<PropertyEditor> editors = getImplementations(PropertyEditor.class);
+        List<PropertyEditor> editors = getImplementations(PropertyEditor.class, Collections.<Constraint<?,?>>emptyList());
         Iterator<PropertyEditor> it = editors.iterator();
         PropertyEditor best = null;
         while(it.hasNext()) {
