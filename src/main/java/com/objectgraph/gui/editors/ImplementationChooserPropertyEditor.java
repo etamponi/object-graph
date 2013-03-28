@@ -3,6 +3,7 @@ package com.objectgraph.gui.editors;
 import com.objectgraph.core.Event;
 import com.objectgraph.core.RootedProperty;
 import com.objectgraph.core.eventtypes.changes.SetProperty;
+import com.objectgraph.gui.EditorManager;
 import com.objectgraph.gui.PropertyEditor;
 import com.objectgraph.pluginsystem.PluginManager;
 import com.objectgraph.utils.ClassUtils;
@@ -108,8 +109,7 @@ public class ImplementationChooserPropertyEditor extends PropertyEditor<Property
         // TODO Create a specific Stage subclass
         Stage stage = new Stage();
 
-        PropertyEditor best = PluginManager.getBestEditor(getModel());
-        System.out.println(best);
+        PropertyEditor best = EditorManager.getBestEditor(getModel());
         if (best != null) {
             stage.setScene(new Scene(best));
             best.attach(getModel());

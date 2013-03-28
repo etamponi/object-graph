@@ -43,10 +43,10 @@ public class Prova {
                 @Override
                 protected String check(Node element) {
                     if (Strings.nullToEmpty(getNode().s).equals("Automatic message")) {
-                        if (element instanceof MapNode)
+                        if (element instanceof ProvaNode)
                             return null;
                         else
-                            return "should be an instance of MapNode";
+                            return "should be an instance of ProvaNode";
                     } else
                         return null;
                 }
@@ -71,11 +71,11 @@ public class Prova {
             PropertyEditor editor1 = new StringPropertyEditor().attach(node.getProperty("s"));
             PropertyEditor editor2 = new StringPropertyEditor().attach(node.getProperty("s"));
             PropertyEditor[] editors = {
-                    PluginManager.getBestEditor(node.getProperty("i"), true),
-                    PluginManager.getBestEditor(node.getProperty("d"), true),
-                    PluginManager.getBestEditor(node.getProperty("f"), true),
-                    PluginManager.getBestEditor(node.getProperty("sh"), true),
-                    PluginManager.getBestEditor(node.getProperty("b"), true),
+                    EditorManager.getBestEditor(node.getProperty("i"), true),
+                    EditorManager.getBestEditor(node.getProperty("d"), true),
+                    EditorManager.getBestEditor(node.getProperty("f"), true),
+                    EditorManager.getBestEditor(node.getProperty("sh"), true),
+                    EditorManager.getBestEditor(node.getProperty("b"), true),
             };
             PropertyEditor editor3 = new ImplementationChooserPropertyEditor().attach(node.getProperty("node"));
 
@@ -108,13 +108,15 @@ public class Prova {
         System.out.println(node.getErrors());
         System.out.println(node.b);
         int i = 1;
-        ProvaNode node = new ProvaNode();
-        provaParent(node);
-        while (node.getFreeProperties().size() != node.getProperties().size()) {
-            System.out.println(i++);
-            if (i > 2)
+        ProvaNode n = new ProvaNode();
+        provaParent(n);
+        while (n.getFreeProperties().size() != n.getProperties().size() && !node.getParentPaths().isEmpty()) {
+//            System.out.println((i++) + " " + node.getParentPaths());
+            if (i > 1000000)
                 System.gc();
         }
+//        EditorManager.detachAllEditors(node);
+        System.out.println(node.getParentPaths());
 
         System.out.println("Finished!");
     }
