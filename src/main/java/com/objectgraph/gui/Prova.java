@@ -3,7 +3,6 @@ package com.objectgraph.gui;
 
 import com.google.common.base.Strings;
 import com.objectgraph.core.Constraint;
-import com.objectgraph.core.MapNode;
 import com.objectgraph.core.Node;
 import com.objectgraph.core.ObjectNode;
 import com.objectgraph.core.triggers.Assignment;
@@ -11,7 +10,6 @@ import com.objectgraph.gui.editors.ImplementationChooserPropertyEditor;
 import com.objectgraph.gui.editors.StringPropertyEditor;
 import com.objectgraph.pluginsystem.PluginConfiguration;
 import com.objectgraph.pluginsystem.PluginManager;
-import com.sun.javafx.runtime.FXExit;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -113,7 +111,7 @@ public class Prova {
             });
             box.getChildren().addAll(editor1, editor3, test);
             int i = 0;
-            for (PropertyEditor editor: editors) {
+            for (PropertyEditor editor : editors) {
                 System.out.println(i++);
                 box.getChildren().add(editor);
             }

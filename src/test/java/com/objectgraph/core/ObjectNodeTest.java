@@ -1,16 +1,15 @@
 package com.objectgraph.core;
 
-import static org.junit.Assert.*;
-
-import java.util.List;
-import java.util.Map;
-
-import org.junit.Test;
-
 import com.objectgraph.core.Error.ErrorLevel;
 import com.objectgraph.pluginsystem.PluginConfiguration;
 import com.objectgraph.pluginsystem.PluginManager;
 import com.objectgraph.utils.StringList;
+import org.junit.Test;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.*;
 
 public class ObjectNodeTest {
 	

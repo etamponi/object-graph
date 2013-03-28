@@ -12,8 +12,6 @@ import javafx.scene.layout.AnchorPane;
 import org.pcollections.PSet;
 
 import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
-import java.util.List;
 import java.util.Set;
 
 public abstract class PropertyEditor extends AnchorPane implements Initializable, EventRecipient {

@@ -60,6 +60,7 @@ public class NumberPropertyEditor extends TextFieldBasedPropertyEditor<Number> {
     private static final Set<Class<?>> supported = Sets.<Class<?>>newHashSet(
             byte.class, Byte.class, short.class, Short.class, int.class, Integer.class,
             long.class, Long.class, float.class, Float.class, double.class, Double.class);
+
     @Override
     public boolean canEdit(RootedProperty model) {
         return supported.contains(model.getValueType(true));

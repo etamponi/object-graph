@@ -1,17 +1,16 @@
 package com.objectgraph.core;
 
-import static org.junit.Assert.assertEquals;
+import com.objectgraph.core.eventtypes.changes.Change;
+import com.objectgraph.core.eventtypes.changes.ListChange;
+import com.objectgraph.core.eventtypes.changes.ListChange.ListChangeType;
+import com.objectgraph.utils.StringList;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.junit.Test;
-
-import com.objectgraph.core.eventtypes.changes.Change;
-import com.objectgraph.core.eventtypes.changes.ListChange;
-import com.objectgraph.core.eventtypes.changes.ListChange.ListChangeType;
-import com.objectgraph.utils.StringList;
+import static org.junit.Assert.assertEquals;
 
 public class ListNodeTest {
 	

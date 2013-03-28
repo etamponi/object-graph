@@ -17,7 +17,6 @@ package com.objectgraph.gui.editors;/*
  * along with object-graph.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import com.google.common.collect.Sets;
 import com.objectgraph.core.RootedProperty;
 
 import java.util.Collections;

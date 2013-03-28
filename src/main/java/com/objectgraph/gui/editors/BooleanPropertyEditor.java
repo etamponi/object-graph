@@ -29,7 +29,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 
 import java.net.URL;
-import java.util.Arrays;
 import java.util.ResourceBundle;
 import java.util.Set;
 

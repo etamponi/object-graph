@@ -29,7 +29,7 @@ import java.util.*;
 
 public class EditorManager {
 
-    private static final List<PropertyEditor> editors = PluginManager.getImplementations(PropertyEditor.class, Collections.<Constraint<?,?>>emptyList());
+    private static final List<PropertyEditor> editors = PluginManager.getImplementations(PropertyEditor.class, Collections.<Constraint<?, ?>>emptyList());
     private static final Map<Class<?>, Class<PropertyEditor>> cachedEditors = new HashMap<>();
     private static final Map<Class<?>, Map<Class<?>, Double>> distances = new HashMap<>();
 
@@ -90,7 +90,7 @@ public class EditorManager {
 
     private static double distance(Class<?> dst, Set<Class<?>> srcSet) {
         double distance = Double.POSITIVE_INFINITY;
-        for(Class<?> src: srcSet) {
+        for (Class<?> src : srcSet) {
             double current = distance(dst, src);
             if (current < distance)
                 distance = current;
@@ -121,7 +121,7 @@ public class EditorManager {
     public static void detachAllEditors(Node node) {
         Map<EventRecipient, Set<String>> parents = node.getParentPaths();
         Iterator<EventRecipient> it = parents.keySet().iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             EventRecipient m = it.next();
             if (m instanceof PropertyEditor) {
                 it.remove();
