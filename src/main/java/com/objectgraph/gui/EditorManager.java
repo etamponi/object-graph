@@ -20,7 +20,7 @@
 package com.objectgraph.gui;
 
 import com.objectgraph.core.Constraint;
-import com.objectgraph.core.EventManager;
+import com.objectgraph.core.EventRecipient;
 import com.objectgraph.core.Node;
 import com.objectgraph.core.RootedProperty;
 import com.objectgraph.pluginsystem.PluginManager;
@@ -33,12 +33,12 @@ public class EditorManager {
     private static final Map<Class<?>, Class<PropertyEditor>> cachedEditors = new HashMap<>();
     private static final Map<Class<?>, Map<Class<?>, Double>> distances = new HashMap<>();
 
-    public static PropertyEditor getBestEditor(RootedProperty model) {
-        return getBestEditor(model, false);
+    public static PropertyEditor getBestEditor(RootedProperty model, boolean runtime) {
+        return getBestEditor(model, runtime, false);
     }
 
-    public static PropertyEditor getBestEditor(RootedProperty model, boolean attach) {
-        Class<?> valueType = model.getValueType(true);
+    public static PropertyEditor getBestEditor(RootedProperty model, boolean runtime, boolean attach) {
+        Class<?> valueType = model.getValueType(runtime);
 
         if (cachedEditors.containsKey(valueType)) {
             PropertyEditor cached = instantiateEditor(cachedEditors.get(valueType));
@@ -80,12 +80,22 @@ public class EditorManager {
     }
 
     private static PropertyEditor updateBestEditor(Class<?> valueType, PropertyEditor current, PropertyEditor candidate) {
-        double candidateDistance = distance(valueType, candidate.getBaseEditableType());
-        double currentDistance = current == null ? Double.POSITIVE_INFINITY : distance(valueType, current.getBaseEditableType());
+        double candidateDistance = distance(valueType, candidate.getBaseEditableTypes());
+        double currentDistance = current == null ? Double.POSITIVE_INFINITY : distance(valueType, current.getBaseEditableTypes());
         if (currentDistance > candidateDistance)
             return candidate;
         else
             return current;
+    }
+
+    private static double distance(Class<?> dst, Set<Class<?>> srcSet) {
+        double distance = Double.POSITIVE_INFINITY;
+        for(Class<?> src: srcSet) {
+            double current = distance(dst, src);
+            if (current < distance)
+                distance = current;
+        }
+        return distance;
     }
 
     private static double distance(Class<?> dst, Class<?> src) {
@@ -109,10 +119,10 @@ public class EditorManager {
     }
 
     public static void detachAllEditors(Node node) {
-        Map<EventManager, Set<String>> parents = node.getParentPaths();
-        Iterator<EventManager> it = parents.keySet().iterator();
+        Map<EventRecipient, Set<String>> parents = node.getParentPaths();
+        Iterator<EventRecipient> it = parents.keySet().iterator();
         while(it.hasNext()) {
-            EventManager m = it.next();
+            EventRecipient m = it.next();
             if (m instanceof PropertyEditor) {
                 it.remove();
                 ((PropertyEditor) m).detach();

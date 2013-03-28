@@ -5,7 +5,6 @@ import com.objectgraph.core.RootedProperty;
 import com.objectgraph.core.eventtypes.changes.SetProperty;
 import com.objectgraph.gui.EditorManager;
 import com.objectgraph.gui.PropertyEditor;
-import com.objectgraph.pluginsystem.PluginManager;
 import com.objectgraph.utils.ClassUtils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -21,10 +20,12 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 
-public class ImplementationChooserPropertyEditor extends PropertyEditor<PropertyEditor> {
+public class ImplementationChooserPropertyEditor extends PropertyEditor {
 
     @FXML
     private ComboBox<Object> implementationBox;
@@ -109,7 +110,7 @@ public class ImplementationChooserPropertyEditor extends PropertyEditor<Property
         // TODO Create a specific Stage subclass
         Stage stage = new Stage();
 
-        PropertyEditor best = EditorManager.getBestEditor(getModel());
+        PropertyEditor best = EditorManager.getBestEditor(getModel(), true, false);
         if (best != null) {
             stage.setScene(new Scene(best));
             best.attach(getModel());
@@ -169,6 +170,11 @@ public class ImplementationChooserPropertyEditor extends PropertyEditor<Property
     @Override
     public boolean canEdit(RootedProperty model) {
         return !ClassUtils.isConcrete(model.getValueType(false));
+    }
+
+    @Override
+    public Set<Class<?>> getBaseEditableTypes() {
+        return Collections.emptySet();
     }
 
 }

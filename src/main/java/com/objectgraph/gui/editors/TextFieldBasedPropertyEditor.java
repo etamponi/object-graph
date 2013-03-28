@@ -14,7 +14,7 @@ import javafx.scene.control.TextField;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public abstract class TextFieldBasedPropertyEditor<T> extends PropertyEditor<T> {
+public abstract class TextFieldBasedPropertyEditor<T> extends PropertyEditor {
 
     @FXML
     protected TextField textField;

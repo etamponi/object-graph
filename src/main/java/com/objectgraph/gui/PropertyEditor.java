@@ -1,7 +1,7 @@
 package com.objectgraph.gui;
 
 import com.objectgraph.core.Event;
-import com.objectgraph.core.EventManager;
+import com.objectgraph.core.EventRecipient;
 import com.objectgraph.core.RootedProperty;
 import com.objectgraph.core.exceptions.EditorNotDetachedException;
 import com.objectgraph.core.exceptions.InvalidModelForEditorException;
@@ -13,8 +13,10 @@ import org.pcollections.PSet;
 
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
+import java.util.List;
+import java.util.Set;
 
-public abstract class PropertyEditor<T> extends AnchorPane implements Initializable, EventManager {
+public abstract class PropertyEditor extends AnchorPane implements Initializable, EventRecipient {
 
     private RootedProperty model;
     private boolean listening = true;
@@ -35,7 +37,7 @@ public abstract class PropertyEditor<T> extends AnchorPane implements Initializa
         }
     }
 
-    public PropertyEditor<T> attach(RootedProperty model) {
+    public PropertyEditor attach(RootedProperty model) {
         if (model == null) {
             detach();
             return this;
@@ -70,16 +72,14 @@ public abstract class PropertyEditor<T> extends AnchorPane implements Initializa
 
     public abstract boolean canEdit(RootedProperty model);
 
+    public abstract Set<Class<?>> getBaseEditableTypes();
+
     public RootedProperty getModel() {
         return model;
     }
 
-    public Class<?> getBaseEditableType() {
-        return (Class<?>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-    }
-
     @Override
-    public void handleEvent(Event e, PSet<EventManager> seen) {
+    public void handleEvent(Event e, PSet<EventRecipient> seen) {
         if (listening && requiresViewUpdate(e)) {
             listening = false;
             updateView();

@@ -17,7 +17,11 @@ package com.objectgraph.gui.editors;/*
  * along with object-graph.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import com.google.common.collect.Sets;
 import com.objectgraph.core.RootedProperty;
+
+import java.util.Collections;
+import java.util.Set;
 
 public class StringPropertyEditor extends TextFieldBasedPropertyEditor<String> {
     @Override
@@ -38,5 +42,10 @@ public class StringPropertyEditor extends TextFieldBasedPropertyEditor<String> {
     @Override
     public boolean canEdit(RootedProperty model) {
         return model.getValueType(false).equals(String.class);
+    }
+
+    @Override
+    public Set<Class<?>> getBaseEditableTypes() {
+        return Collections.<Class<?>>singleton(String.class);
     }
 }

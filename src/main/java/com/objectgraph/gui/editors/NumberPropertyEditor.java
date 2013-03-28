@@ -22,7 +22,7 @@ import com.objectgraph.core.RootedProperty;
 
 import java.util.Set;
 
-public class NumberPropertyEditor extends TextFieldBasedPropertyEditor<Object> {
+public class NumberPropertyEditor extends TextFieldBasedPropertyEditor<Number> {
 
     @Override
     protected Number fromTextToModel(String text) {
@@ -43,7 +43,7 @@ public class NumberPropertyEditor extends TextFieldBasedPropertyEditor<Object> {
     }
 
     @Override
-    protected String fromModelToText(Object value) {
+    protected String fromModelToText(Number value) {
         return String.valueOf(value);
     }
 
@@ -57,11 +57,16 @@ public class NumberPropertyEditor extends TextFieldBasedPropertyEditor<Object> {
         return true;
     }
 
-    private static final Set<?> supported = Sets.newHashSet(
+    private static final Set<Class<?>> supported = Sets.<Class<?>>newHashSet(
             byte.class, Byte.class, short.class, Short.class, int.class, Integer.class,
             long.class, Long.class, float.class, Float.class, double.class, Double.class);
     @Override
     public boolean canEdit(RootedProperty model) {
         return supported.contains(model.getValueType(true));
+    }
+
+    @Override
+    public Set<Class<?>> getBaseEditableTypes() {
+        return supported;
     }
 }

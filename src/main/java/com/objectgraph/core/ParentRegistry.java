@@ -7,7 +7,7 @@ class ParentRegistry {
     private ParentRegistry() {
     }
 
-    private final static Map<Node, Map<EventManager, Set<String>>> registry = new WeakHashMap<>();
+    private final static Map<Node, Map<EventRecipient, Set<String>>> registry = new WeakHashMap<>();
 
     static void registerTree(Node root) {
         for (String property : root.getProperties()) {
@@ -19,7 +19,7 @@ class ParentRegistry {
         }
     }
 
-    static boolean registered(EventManager parent, String property, Node child) {
+    static boolean registered(EventRecipient parent, String property, Node child) {
         if (!registry.containsKey(child))
             return false;
         if (!registry.get(child).containsKey(parent))
@@ -27,15 +27,15 @@ class ParentRegistry {
         return registry.get(child).get(parent).contains(property);
     }
 
-    static void register(EventManager parent, String property, Node child) {
+    static void register(EventRecipient parent, String property, Node child) {
         if (!registry.containsKey(child))
-            registry.put(child, new WeakHashMap<EventManager, Set<String>>());
+            registry.put(child, new WeakHashMap<EventRecipient, Set<String>>());
         if (!registry.get(child).containsKey(parent))
             registry.get(child).put(parent, new HashSet<String>());
         registry.get(child).get(parent).add(property);
     }
 
-    static void unregister(EventManager parent, String property, Node child) {
+    static void unregister(EventRecipient parent, String property, Node child) {
         if (!registry.containsKey(child))
             return;
         if (!registry.get(child).containsKey(parent))
@@ -47,7 +47,7 @@ class ParentRegistry {
             registry.remove(child);
     }
 
-    static Map<EventManager, Set<String>> getParentPaths(Node child) {
+    static Map<EventRecipient, Set<String>> getParentPaths(Node child) {
         if (!registry.containsKey(child))
             return Collections.emptyMap();
         return registry.get(child);

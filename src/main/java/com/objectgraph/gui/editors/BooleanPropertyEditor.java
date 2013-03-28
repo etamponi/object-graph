@@ -19,6 +19,7 @@
 
 package com.objectgraph.gui.editors;
 
+import com.google.common.collect.Sets;
 import com.objectgraph.core.Event;
 import com.objectgraph.core.RootedProperty;
 import com.objectgraph.gui.PropertyEditor;
@@ -28,9 +29,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.ResourceBundle;
+import java.util.Set;
 
-public class BooleanPropertyEditor extends PropertyEditor<Object> {
+public class BooleanPropertyEditor extends PropertyEditor {
 
     @FXML
     private CheckBox checkBox;
@@ -72,5 +75,10 @@ public class BooleanPropertyEditor extends PropertyEditor<Object> {
     public boolean canEdit(RootedProperty model) {
         Class<?> type = model.getValueType(true);
         return type == boolean.class || type == Boolean.class;
+    }
+
+    @Override
+    public Set<Class<?>> getBaseEditableTypes() {
+        return Sets.<Class<?>>newHashSet(boolean.class, Boolean.class);
     }
 }

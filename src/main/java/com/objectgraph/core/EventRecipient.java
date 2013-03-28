@@ -19,8 +19,8 @@ package com.objectgraph.core;/*
 
 import org.pcollections.PSet;
 
-public interface EventManager {
+public interface EventRecipient {
 
-    public void handleEvent(Event e, PSet<EventManager> seen);
+    public void handleEvent(Event e, PSet<EventRecipient> seen);
 
 }

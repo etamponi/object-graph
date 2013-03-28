@@ -11,13 +11,19 @@ import com.objectgraph.gui.editors.ImplementationChooserPropertyEditor;
 import com.objectgraph.gui.editors.StringPropertyEditor;
 import com.objectgraph.pluginsystem.PluginConfiguration;
 import com.objectgraph.pluginsystem.PluginManager;
+import com.sun.javafx.runtime.FXExit;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 
 public class Prova {
     private static ProvaNode node = new ProvaNode();
@@ -66,20 +72,38 @@ public class Prova {
     }
 
     public static class MyApp extends Application {
+        private static Scene scene;
+        private static VBox box;
+
         @Override
         public void start(Stage stage) throws Exception {
+            AnchorPane pane = new AnchorPane();
+            Button button = new Button("Open");
+            button.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent actionEvent) {
+                    openStage();
+                }
+            });
+            pane.getChildren().add(button);
+            stage.setScene(new Scene(pane));
+            stage.show();
+        }
+
+        private void openStage() {
+            Stage stage = new Stage();
             PropertyEditor editor1 = new StringPropertyEditor().attach(node.getProperty("s"));
-            PropertyEditor editor2 = new StringPropertyEditor().attach(node.getProperty("s"));
             PropertyEditor[] editors = {
-                    EditorManager.getBestEditor(node.getProperty("i"), true),
-                    EditorManager.getBestEditor(node.getProperty("d"), true),
-                    EditorManager.getBestEditor(node.getProperty("f"), true),
-                    EditorManager.getBestEditor(node.getProperty("sh"), true),
-                    EditorManager.getBestEditor(node.getProperty("b"), true),
+                    EditorManager.getBestEditor(node.getProperty("i"), false, true),
+                    EditorManager.getBestEditor(node.getProperty("d"), false, true),
+                    EditorManager.getBestEditor(node.getProperty("f"), false, true),
+                    EditorManager.getBestEditor(node.getProperty("sh"), false, true),
+                    EditorManager.getBestEditor(node.getProperty("b"), false, true)
             };
+            System.out.println(editors.length);
             PropertyEditor editor3 = new ImplementationChooserPropertyEditor().attach(node.getProperty("node"));
 
-            VBox box = new VBox();
+            box = new VBox();
             Button test = new Button("Automatic");
             test.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
@@ -87,14 +111,26 @@ public class Prova {
                     node.set("s", "Automatic message");
                 }
             });
-            box.getChildren().addAll(editor1, editor2, editor3, test);
-            box.getChildren().addAll(editors);
+            box.getChildren().addAll(editor1, editor3, test);
+            int i = 0;
+            for (PropertyEditor editor: editors) {
+                System.out.println(i++);
+                box.getChildren().add(editor);
+            }
 
-            Scene scene = new Scene(box);
+            scene = new Scene(box);
             scene.getStylesheets().add("com/objectgraph/gui/objectgraphgui.css");
 
+            stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                @Override
+                public void handle(WindowEvent windowEvent) {
+                    box.getChildren().clear();
+                    box = null;
+                }
+            });
+
             stage.setScene(scene);
-            stage.show();
+            stage.showAndWait();
         }
     }
 
@@ -102,20 +138,26 @@ public class Prova {
         new ProvaParent().set("child", node);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         PluginManager.initialise(new PluginConfiguration("com.objectgraph"));
         Application.launch(MyApp.class);
+        ReferenceQueue<Scene> q = new ReferenceQueue<Scene>();
+        WeakReference<Scene> scene = new WeakReference<Scene>(MyApp.scene, q);
+        MyApp.scene = null;
         System.out.println(node.getErrors());
         System.out.println(node.b);
         int i = 1;
         ProvaNode n = new ProvaNode();
         provaParent(n);
-        while (n.getFreeProperties().size() != n.getProperties().size() && !node.getParentPaths().isEmpty()) {
-//            System.out.println((i++) + " " + node.getParentPaths());
-            if (i > 1000000)
+        while (n.getFreeProperties().size() != n.getProperties().size() || !node.getParentPaths().isEmpty()) {
+            System.out.println((i++) + " " + node.getParentPaths());
+            if (i > 1000)
                 System.gc();
+
+            System.out.println(scene.get());
         }
 //        EditorManager.detachAllEditors(node);
+        q.poll();
         System.out.println(node.getParentPaths());
 
         System.out.println("Finished!");

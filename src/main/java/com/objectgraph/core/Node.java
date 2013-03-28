@@ -62,7 +62,7 @@ import java.util.*;
  *
  * @author Emanuele Tamponi
  */
-public abstract class Node implements EventManager {
+public abstract class Node implements EventRecipient {
 
     private final Set<Trigger<?>> triggers = new HashSet<>();
 
@@ -131,19 +131,19 @@ public abstract class Node implements EventManager {
      * @param parent   the parent Node
      * @param property the name of the property that connects the parent to this Node
      */
-    public void addParentPath(EventManager parent, String property) {
+    public void addParentPath(EventRecipient parent, String property) {
         ParentRegistry.register(parent, property, this);
     }
 
     /**
      * Removes a previously defined parent Node
      * <p/>
-     * See {@link #addParentPath(EventManager, String)} for a definition of parent Nodes.
+     * See {@link #addParentPath(EventRecipient, String)} for a definition of parent Nodes.
      *
      * @param parent   the parent Node to remove from the parent list
      * @param property the name of the property that connects the parent to this Node
      */
-    public void removeParentPath(EventManager parent, String property) {
+    public void removeParentPath(EventRecipient parent, String property) {
         ParentRegistry.unregister(parent, property, this);
     }
 
@@ -272,7 +272,7 @@ public abstract class Node implements EventManager {
             }
         }
 
-        for (EventManager p : getParentPaths().keySet()) {
+        for (EventRecipient p : getParentPaths().keySet()) {
             if (p instanceof Node && !seen.contains(p)) {
                 Node parent = (Node)p;
                 for (String path : getParentPaths().get(parent))
@@ -285,7 +285,7 @@ public abstract class Node implements EventManager {
     /**
      * @return
      */
-    public Map<EventManager, Set<String>> getParentPaths() {
+    public Map<EventRecipient, Set<String>> getParentPaths() {
         return ParentRegistry.getParentPaths(this);
     }
 
@@ -293,15 +293,15 @@ public abstract class Node implements EventManager {
      * @param e
      */
     protected void fireEvent(Event e) {
-        handleEvent(e, HashTreePSet.<EventManager>singleton(this));
+        handleEvent(e, HashTreePSet.<EventRecipient>singleton(this));
     }
 
     @Override
-    public void handleEvent(Event e, PSet<EventManager> seen) {
+    public void handleEvent(Event e, PSet<EventRecipient> seen) {
         for (Trigger<?> t : triggers)
             t.check(e);
 
-        for (EventManager parent : getParentPaths().keySet()) {
+        for (EventRecipient parent : getParentPaths().keySet()) {
             if (seen.contains(parent))
                 continue;
             for (String path : getParentPaths().get(parent))
@@ -428,7 +428,7 @@ public abstract class Node implements EventManager {
             throw new PropertyNotExistsException(new RootedProperty(this, property));
 
         List<Constraint<?, ?>> list = new ArrayList<>();
-        getConstraints(property, list, HashTreePSet.<EventManager>empty());
+        getConstraints(property, list, HashTreePSet.<EventRecipient>empty());
 
         return PluginManager.getImplementations(getPropertyType(property, false), list);
     }
@@ -438,11 +438,11 @@ public abstract class Node implements EventManager {
      * @param list
      * @param seen
      */
-    public void getConstraints(String path, List<Constraint<?, ?>> list, PSet<EventManager> seen) {
+    public void getConstraints(String path, List<Constraint<?, ?>> list, PSet<EventRecipient> seen) {
         if (constraints.containsKey(path))
             list.addAll(constraints.get(path));
 
-        for (EventManager p : getParentPaths().keySet()) {
+        for (EventRecipient p : getParentPaths().keySet()) {
             if (p instanceof Node && !seen.contains(p)) {
                 Node parent = (Node)p;
                 for (String parentPath : getParentPaths().get(parent))
