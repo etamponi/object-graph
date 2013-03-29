@@ -22,8 +22,8 @@ package com.objectgraph.gui;
 import com.objectgraph.core.Event;
 import com.objectgraph.core.EventRecipient;
 import com.objectgraph.core.RootedProperty;
-import com.objectgraph.core.exceptions.EditorNotDetachedException;
-import com.objectgraph.core.exceptions.InvalidModelForEditorException;
+import com.objectgraph.gui.exceptions.EditorNotDetachedException;
+import com.objectgraph.gui.exceptions.InvalidModelForEditorException;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
@@ -96,7 +96,7 @@ public abstract class PropertyEditor extends AnchorPane implements Initializable
     }
 
     @Override
-    public void handleEvent(Event e, PSet<EventRecipient> seen) {
+    public void handleEvent(Event e, PSet<EventRecipient> visited) {
         if (listening && requiresViewUpdate(e)) {
             listening = false;
             updateView();

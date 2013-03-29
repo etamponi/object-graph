@@ -354,15 +354,15 @@ public abstract class Node implements EventRecipient {
     }
 
     @Override
-    public void handleEvent(Event e, PSet<EventRecipient> seen) {
+    public void handleEvent(Event e, PSet<EventRecipient> visited) {
         for (Trigger<?> t : triggers)
             t.check(e);
 
         for (EventRecipient parent : getParentPaths().keySet()) {
-            if (seen.contains(parent))
+            if (visited.contains(parent))
                 continue;
             for (String path : getParentPaths().get(parent))
-                parent.handleEvent(e.backPropagate(path), seen.plus(parent));
+                parent.handleEvent(e.backPropagate(path), visited.plus(parent));
         }
     }
 
@@ -508,6 +508,11 @@ public abstract class Node implements EventRecipient {
         }
     }
 
+    /**
+     *
+     * @param property
+     * @return
+     */
     public RootedProperty getProperty(String property) {
         RootedProperty ret = new RootedProperty(this, property);
         if (!hasProperty(property))

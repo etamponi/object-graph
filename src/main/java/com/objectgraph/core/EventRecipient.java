@@ -22,10 +22,21 @@ package com.objectgraph.core;
 import org.pcollections.PSet;
 
 /**
- *
+ * An interface that define objects that can be reached by Event and that can handle them.
+ * <p/>
+ * The EventRecipient interface is needed to define various types of object in an event dispatch graph. The main type of
+ * object in such a graph is a {@link Node}, but you can also define a {@link com.objectgraph.gui.PropertyEditor}, that
+ * sits at the "root" of the graph and that does not dispatch events any further.
+ * <p/>
+ * This interface is for internal use and should be reimplemented with great care.
  */
 public interface EventRecipient {
 
-    public void handleEvent(Event e, PSet<EventRecipient> seen);
+    /**
+     * Handle an {@link Event} that reachs this object, considering that some other objects have been already visited.
+     * @param e the Event that reachs this object
+     * @param visited other objects already visited in the dispatch chain of this Event.
+     */
+    public void handleEvent(Event e, PSet<EventRecipient> visited);
 
 }
