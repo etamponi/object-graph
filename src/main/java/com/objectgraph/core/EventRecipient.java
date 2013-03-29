@@ -21,6 +21,9 @@ package com.objectgraph.core;
 
 import org.pcollections.PSet;
 
+/**
+ *
+ */
 public interface EventRecipient {
 
     public void handleEvent(Event e, PSet<EventRecipient> seen);

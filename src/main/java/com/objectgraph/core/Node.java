@@ -44,8 +44,7 @@ import java.util.*;
  * <li>A method to know the declared type for each property, {@link #getDeclaredPropertyType(String)}</li>
  * </ul>
  * <p/>
- * In turn, the following services are provided:<br/>
- * <br/>
+ * In turn, the following services are provided:
  * <dl>
  * <dt>Automatic dispatch of events through the graph defined by Node properties</dt>
  * <dd>Suppose that a Node, say X, has a property {@code "a"} which in turn references a Node Y with a property
@@ -124,9 +123,19 @@ public abstract class Node implements EventRecipient {
     /**
      * Performs some tweaks on properties.
      * <p/>
-     * If you use the automatic construction for some properties that are themselves Nodes, they are assigned
-     * without the use of the {@link #set(String, Object)} method, and then they need to be properly assigned.
-     * This method does that for you, instead of assigning everything manually inside the constructor.
+     * You should call this method at the end of the constructor of every subclass, to assure that every property gets
+     * correctly initialized. What this method does, is to register properties that may have been initialized outside
+     * the constructor. For example, supposing that {@code Child} is a {@link Node} implementation:
+     * <pre>
+     *     public MyNode extends ObjectNode {
+     *         @Property
+     *         protected Child child = new Child(); // This is initialized outside the constructor, without set()
+     *     }
+     * </pre>
+     * in this case, as you see, the property MyNode.child is not initialised using the {@link #set(String, Object)}
+     * method. By calling {@code initialiseNode()} at the end of the constructor, every such property get correctly
+     * set.
+     *
      */
     protected void initialiseNode() {
         for (String property : getProperties()) {
@@ -139,15 +148,15 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
-     * Adds a parent node to this.
+     * Adds an {@link EventRecipient} parent to this Node.
      * <p/>
-     * The event dispatch system works using the notion of "parent" Nodes: they are the Nodes that have a property
-     * that points to this Node. Whenever an Event gets propagated to this Node, it gets dispatched to every parent
-     * through a path defined by the {@code property} parameter.
+     * The event dispatch system works using the notion of "parent" EventRecipients: whenever an Event gets propagated
+     * to this Node, it gets dispatched to every parent through a path defined by the {@code property} parameter.
      * <p/>
-     * This method should be used with great care.
+     * This method should be used with great care, as it is used internally by {@link #set(String, Object)} and other
+     * methods, and you should not need to use it directly.
      *
-     * @param parent   the parent Node
+     * @param parent   the parent EventRecipient
      * @param property the name of the property that connects the parent to this Node
      */
     public void addParentPath(EventRecipient parent, String property) {
@@ -155,11 +164,11 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
-     * Removes a previously defined parent Node
+     * Removes a previously defined parent EventRecipient
      * <p/>
-     * See {@link #addParentPath(EventRecipient, String)} for a definition of parent Nodes.
+     * See {@link #addParentPath(EventRecipient, String)} for a definition of parents.
      *
-     * @param parent   the parent Node to remove from the parent list
+     * @param parent   the parent EventRecipient to remove from the parent list
      * @param property the name of the property that connects the parent to this Node
      */
     public void removeParentPath(EventRecipient parent, String property) {
@@ -167,10 +176,39 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
-     * Set the content of the property specified by the given path and fires a Change Event in case of success.
+     * Set the content of the property specified by the given path and fires a SetProperty event in case of success.
+     * <p/>
+     * You should use this method to set Node properties (either directly, or wrapped in a standard setter method). It
+     * is connected with the event system, so that once the property has been set, a new {@link Event} with type
+     * {@link SetProperty} {@link EventType} gets fired and propagates through the graph defined by parents paths.
+     * <p/>
+     * This method can be used to set either a <i>local</i> property, or a <i>nested</i> property, that is, a property
+     * that belongs to a Node which is in turn a property of this Node (the path can be arbitrarly deep).
+     * <p/>
+     * To show how you can use this method, consider the following example:
+     * <pre>
+     *     public class MyChild extends ObjectNode {
+     *         @Property
+     *         protected String s;
+     *          :
+     *          :
+     *     }
      *
-     * @param path
-     * @param value
+     *     public class MyNode extends ObjectNode {
+     *         @Property
+     *         protected MyChild child;
+     *          :
+     *          :
+     *     }
+     *
+     *     public static void main(String... args) {
+     *         MyNode node = new MyNode();
+     *         node.set("child.s", "Hello, World!");
+     *     }
+     * </pre>
+     *
+     * @param path the named path to the property that should be set
+     * @param value the new value of the property
      */
     public void set(String path, Object value) {
         if (path.isEmpty())
