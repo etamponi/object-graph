@@ -109,16 +109,16 @@ public class Prova {
 
         private void openStage() {
             Stage stage = new Stage();
-            PropertyEditor editor1 = new StringPropertyEditor().attach(node.getProperty("s"));
+            PropertyEditor editor1 = new StringPropertyEditor().attach(node.getRootedProperty("s"));
             PropertyEditor[] editors = {
-                    EditorManager.getBestEditor(node.getProperty("i"), false, true),
-                    EditorManager.getBestEditor(node.getProperty("d"), false, true),
-                    EditorManager.getBestEditor(node.getProperty("f"), false, true),
-                    EditorManager.getBestEditor(node.getProperty("sh"), false, true),
-                    EditorManager.getBestEditor(node.getProperty("b"), false, true)
+                    EditorManager.getBestEditor(node.getRootedProperty("i"), false, true),
+                    EditorManager.getBestEditor(node.getRootedProperty("d"), false, true),
+                    EditorManager.getBestEditor(node.getRootedProperty("f"), false, true),
+                    EditorManager.getBestEditor(node.getRootedProperty("sh"), false, true),
+                    EditorManager.getBestEditor(node.getRootedProperty("b"), false, true)
             };
             System.out.println(editors.length);
-            PropertyEditor editor3 = new ImplementationChooserPropertyEditor().attach(node.getProperty("node"));
+            PropertyEditor editor3 = new ImplementationChooserPropertyEditor().attach(node.getRootedProperty("node"));
 
             box = new VBox();
             Button test = new Button("Automatic");

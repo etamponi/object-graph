@@ -35,6 +35,7 @@ public class NodeSerializer extends Serializer<Node> {
 
     @Override
     public Node read(Kryo kryo, Input input, Class<Node> nodeClass) {
+        // TODO check if it is needed the same trick as in copy()
         Serializer<Node> serializer = new FieldSerializer<>(kryo, nodeClass);
         Node ret = serializer.read(kryo, input, nodeClass);
         ParentRegistry.registerTree(ret);

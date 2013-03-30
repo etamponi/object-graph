@@ -243,15 +243,27 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
-     * @param property
-     * @param value
+     * Defines how to set a local property
+     *
+     * The Node abstract class does not define how properties are handled "internally" by implementations. The way with
+     * which a certain named property is set is defined by the implementation itself. Look at {@link ObjectNode} and
+     * {@link ListNode} for examples. ObjectNode defines properties by using the annotation {@link com.objectgraph.core.ObjectNode.Property},
+     * while ListNode defines a property by the index with which you'd access an element in the list. Look also at the example
+     * in {@link #set(String, Object)}.
+     *
+     * @param property the name of the property that should be set
+     * @param value the new value of the property
      */
     protected abstract void setLocal(String property, Object value);
 
     /**
-     * @param path
-     * @param type
-     * @return
+     * Returns the value of the property defined by the given path, and casts it to the given type.
+     *
+     * This is used to access local or nested properties by their runtime names.
+     *
+     * @param path the path to the property
+     * @param type the type to which you want to cast the value
+     * @return the value of the property, or null if some intermediate Node is null
      */
     @SuppressWarnings("unchecked")
     public <T> T get(String path, Class<T> type) {
@@ -259,8 +271,12 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
-     * @param path
-     * @return
+     * Returns the value of the property defined by the given path.
+     *
+     * This is used to access local or nested properties by their runtime names.
+     *
+     * @param path the path to the property
+     * @return the value of the property, or null if some intermediate Node is null
      */
     @SuppressWarnings("unchecked")
     public <T> T get(String path) {
@@ -513,7 +529,7 @@ public abstract class Node implements EventRecipient {
      * @param property
      * @return
      */
-    public RootedProperty getProperty(String property) {
+    public RootedProperty getRootedProperty(String property) {
         RootedProperty ret = new RootedProperty(this, property);
         if (!hasProperty(property))
             throw new PropertyNotExistsException(ret);
