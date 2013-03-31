@@ -258,7 +258,7 @@ public abstract class Node implements EventRecipient {
 
     /**
      * Returns the value of the property defined by the given path, and casts it to the given type.
-     *
+     * <p/>
      * This is used to access local or nested properties by their runtime names.
      *
      * @param path the path to the property
@@ -272,7 +272,7 @@ public abstract class Node implements EventRecipient {
 
     /**
      * Returns the value of the property defined by the given path.
-     *
+     * <p/>
      * This is used to access local or nested properties by their runtime names.
      *
      * @param path the path to the property
@@ -313,7 +313,7 @@ public abstract class Node implements EventRecipient {
 
     /**
      * Checks if the given property is present in the current object
-     *
+     * <p/>
      * Consider that some methods throw exceptions if an invalid property name is given as parameter.
      *
      * @param property the name of the property
@@ -332,7 +332,7 @@ public abstract class Node implements EventRecipient {
 
     /**
      * A list of properties that are not controlled by any {@link Trigger}.
-     *
+     * <p/>
      * Each trigger can define one or more "controlled" or "bound" properties. The concept of bound properties is
      * particularly useful when coupled with dynamic GUI generation, as you can decide that bound properties should not
      * show up in the user interface, or should be shown in read-only mode.
@@ -347,7 +347,7 @@ public abstract class Node implements EventRecipient {
 
     /**
      * A list of properties controlled by some {@link Trigger}
-     *
+     * <p/>
      * See {@link #getFreeProperties()} as a reference.
      *
      * @return a list of properties controlled by at least one Trigger
@@ -481,7 +481,9 @@ public abstract class Node implements EventRecipient {
     protected abstract Class<?> getDeclaredPropertyType(String property);
 
     /**
-     * @param e
+     * Register an {@link ErrorCheck} that will be used by {@link #getErrors()}
+     *
+     * @param e the ErrorCheck to be registered
      */
     @SuppressWarnings("unchecked")
     public <N extends Node> void addErrorCheck(ErrorCheck<N> e) {
@@ -490,7 +492,9 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
-     * @param e
+     * Removes a previously defined {@link ErrorCheck}
+     *
+     * @param e the ErrorCheck to be removed
      */
     public void removeErrorCheck(ErrorCheck<?> e) {
         if (errorChecks.remove(e))
@@ -498,22 +502,26 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
-     * @return
+     * Recursively find errors in nested paths using registered {@link ErrorCheck}s
+     *
+     * @return a map with the properties which generated the {@link Error}s as keys and a set of errors as values
      */
-    public Map<String, Error> getErrors() {
-        Map<String, Error> ret = new LinkedHashMap<>();
+    public Map<String, Set<Error>> getErrors() {
+        Map<String, Set<Error>> ret = new LinkedHashMap<>();
         getErrors(ret, "", new HashSet<Node>());
         return ret;
     }
 
-    private void getErrors(Map<String, Error> errors, String path, Set<Node> seen) {
+    private void getErrors(Map<String, Set<Error>> errors, String path, Set<Node> seen) {
         if (seen.contains(this))
             return;
         seen.add(this);
         for (ErrorCheck<?> check : errorChecks) {
             Error error = check.getError();
             if (error != null) {
-                errors.put(path, error);
+                if (!errors.containsKey(path))
+                    errors.put(path, new HashSet<Error>());
+                errors.get(path).add(error);
             }
         }
         for (String property : getProperties()) {
@@ -524,34 +532,45 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
-     * @param t
+     * Register a new {@link Constraint}
+     *
+     * {@link Constraint}s are a special kind of {@link ErrorCheck}s that can be used by the {@link PluginManager} to
+     * find <i>compatible</i> implementations of a given property. See the documentation of {@link PluginManager} for
+     * further help.
+     *
+     * @param constraint the Constraint to register
      */
     @SuppressWarnings("unchecked")
-    public <N extends Node> void addConstraint(Constraint<N, ?> t) {
-        t.setNode((N) this);
-        if (!constraints.containsKey(t.getPath()))
-            constraints.put(t.getPath(), new HashSet<Constraint<?, ?>>());
+    public <N extends Node> void addConstraint(Constraint<N, ?> constraint) {
+        // TODO move the Constraint system to the PluginManager
+        constraint.setNode((N) this);
+        if (!constraints.containsKey(constraint.getPath()))
+            constraints.put(constraint.getPath(), new HashSet<Constraint<?, ?>>());
 
-        constraints.get(t.getPath()).add(t);
-        errorChecks.add(t);
+        constraints.get(constraint.getPath()).add(constraint);
+        errorChecks.add(constraint);
     }
 
     /**
-     * @param t
+     * Remove a previously registered {@link Constraint}
+     *
+     * @param constraint the constraint to be removed
      */
-    public void removeConstraint(Constraint<?, ?> t) {
-        String path = t.getPath();
-        if (constraints.containsKey(path) && constraints.get(path).remove(t)) {
+    public void removeConstraint(Constraint<?, ?> constraint) {
+        String path = constraint.getPath();
+        if (constraints.containsKey(path) && constraints.get(path).remove(constraint)) {
             if (constraints.get(path).isEmpty())
                 constraints.remove(path);
-            errorChecks.remove(t);
-            t.setNode(null);
+            errorChecks.remove(constraint);
+            constraint.setNode(null);
         }
     }
 
     /**
-     * @param property
-     * @return
+     * Return a list of values compatible with every {@link Constraint} defined for this property in this Node or in its parents.
+     *
+     * @param property the name of the property
+     * @return a {@link List} of newly instantiated objects that can be assigned to the given property
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public List<?> getPossiblePropertyValues(String property) {
@@ -564,12 +583,7 @@ public abstract class Node implements EventRecipient {
         return PluginManager.getImplementations(getPropertyType(property, false), list);
     }
 
-    /**
-     * @param path
-     * @param list
-     * @param seen
-     */
-    public void getConstraints(String path, List<Constraint<?, ?>> list, PSet<EventRecipient> seen) {
+    private void getConstraints(String path, List<Constraint<?, ?>> list, PSet<EventRecipient> seen) {
         if (constraints.containsKey(path))
             list.addAll(constraints.get(path));
 
@@ -583,9 +597,10 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
+     * Return a {@link RootedProperty} relative to the given property
      *
-     * @param property
-     * @return
+     * @param property the name of the property
+     * @return a {@link RootedProperty} object
      */
     public RootedProperty getRootedProperty(String property) {
         RootedProperty ret = new RootedProperty(this, property);
