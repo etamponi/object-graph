@@ -63,6 +63,7 @@ public class PausableAsyncTask<V> extends Task<V> implements Pausable {
 
     @Override
     public void pause() {
+        // TODO should set paused when the task gets actually paused?
         if (!isRunning())
             throw new IllegalStateException("Cannot pause a task if it is not in RUNNING or SCHEDULED state");
         if (!paused && isRunning()) {
@@ -98,6 +99,7 @@ public class PausableAsyncTask<V> extends Task<V> implements Pausable {
 
     @Override
     protected V call() throws Exception {
+        // TODO make observer optional and with custom sleep time
         Thread t = new Thread(new Runnable() {
             final Thread main = Thread.currentThread();
 
@@ -112,8 +114,7 @@ public class PausableAsyncTask<V> extends Task<V> implements Pausable {
                         }
                         Thread.sleep(5);
                     }
-                } catch (InterruptedException ex) {
-                }
+                } catch (InterruptedException ex) { /* stop observer */ }
             }
         });
         t.start();
@@ -124,8 +125,6 @@ public class PausableAsyncTask<V> extends Task<V> implements Pausable {
             V ret = (V) access.invoke(node, jobName, params);
             updateProgress(100, 100);
             return ret;
-        } catch (Exception ex) {
-            throw ex;
         } finally {
             PausableAsyncTask.removeThreadTaskPair(Thread.currentThread());
             t.interrupt();

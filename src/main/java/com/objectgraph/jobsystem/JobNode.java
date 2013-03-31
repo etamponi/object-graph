@@ -39,8 +39,7 @@ public abstract class JobNode extends ObjectNode {
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
-    protected @interface Job {
-    }
+    protected @interface Job { }
 
     private static final Map<Class<?>, Map<String, JobInfo>> classJobInfos = new HashMap<>();
     private static final Map<Class<?>, List<String>> classJobs = new HashMap<>();
@@ -194,21 +193,21 @@ public abstract class JobNode extends ObjectNode {
                     !jobs.getLast().getTypeName().equals(innermostType))
                 throw new TryLaterException();
 
-            JobInfo outerjob = jobs.pollFirst();
+            JobInfo outerJob = jobs.pollFirst();
             double progress = 0;
-            double outerstart = outerjob.getPosition();
-            double outerLength = outerjob.getRunningLength();
+            double outerStart = outerJob.getPosition();
+            double outerLength = outerJob.getRunningLength();
             double ratio = 1;
             double currentRun = 0;
             double totalRuns = 1;
             while (true) {
-                if (outerjob.getCycles().containsKey(currentLine))
+                if (outerJob.getCycles().containsKey(currentLine))
                     throw new TryLaterException();
 
-                for (CycleInfo cycleInfo : outerjob.getCurrentCycles()) {
-                    progress += ratio * ((cycleInfo.getRunningPosition() - outerstart) / outerLength + currentRun) / totalRuns;
+                for (CycleInfo cycleInfo : outerJob.getCurrentCycles()) {
+                    progress += ratio * ((cycleInfo.getRunningPosition() - outerStart) / outerLength + currentRun) / totalRuns;
                     ratio = ratio * cycleInfo.getRunningLength() / (outerLength * totalRuns);
-                    outerstart = cycleInfo.getRunningPosition();
+                    outerStart = cycleInfo.getRunningPosition();
                     outerLength = cycleInfo.getRunningLength();
                     currentRun = cycleInfo.getCurrentRun();
                     totalRuns = cycleInfo.getTotalRuns();
@@ -217,17 +216,17 @@ public abstract class JobNode extends ObjectNode {
                 if (jobs.isEmpty())
                     break;
 
-                JobInfo innerjob = jobs.pollFirst();
-                progress += ratio * (((outerjob.getRunningLine(innerjob.getCallPosition()) - outerstart) / outerLength) + currentRun) / totalRuns;
-                ratio = ratio * innerjob.getCodeLength() / (outerLength * totalRuns);
-                outerstart = innerjob.getPosition();
-                outerLength = innerjob.getRunningLength();
+                JobInfo innerJob = jobs.pollFirst();
+                progress += ratio * (((outerJob.getRunningLine(innerJob.getCallPosition()) - outerStart) / outerLength) + currentRun) / totalRuns;
+                ratio = ratio * innerJob.getCodeLength() / (outerLength * totalRuns);
+                outerStart = innerJob.getPosition();
+                outerLength = innerJob.getRunningLength();
                 currentRun = 0;
                 totalRuns = 1;
-                outerjob = innerjob;
+                outerJob = innerJob;
             }
 
-            progress += ratio * ((outerjob.getRunningLine(currentLine) - outerstart) / outerLength + currentRun) / totalRuns;
+            progress += ratio * ((outerJob.getRunningLine(currentLine) - outerStart) / outerLength + currentRun) / totalRuns;
 
             return (int) (100 * progress);
         }
