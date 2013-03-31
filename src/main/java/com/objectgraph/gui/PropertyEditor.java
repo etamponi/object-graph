@@ -78,6 +78,7 @@ public abstract class PropertyEditor extends AnchorPane implements Initializable
     public void detach() {
         if (model != null) {
             model.getRoot().removeParentPath(this, "");
+            model = null;
         }
     }
 

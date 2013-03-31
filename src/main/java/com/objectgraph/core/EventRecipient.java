@@ -33,8 +33,8 @@ import org.pcollections.PSet;
 public interface EventRecipient {
 
     /**
-     * Handle an {@link Event} that reachs this object, considering that some other objects have been already visited.
-     * @param e the Event that reachs this object
+     * Handle an {@link Event} that reaches this object, considering that some other objects have been already visited.
+     * @param e the Event that reaches this object
      * @param visited other objects already visited in the dispatch chain of this Event.
      */
     public void handleEvent(Event e, PSet<EventRecipient> visited);

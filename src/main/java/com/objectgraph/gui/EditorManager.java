@@ -119,14 +119,10 @@ public class EditorManager {
     }
 
     public static void detachAllEditors(Node node) {
-        Map<EventRecipient, Set<String>> parents = node.getParentPaths();
-        Iterator<EventRecipient> it = parents.keySet().iterator();
-        while (it.hasNext()) {
-            EventRecipient m = it.next();
-            if (m instanceof PropertyEditor) {
-                it.remove();
+        Map<EventRecipient, Set<String>> parents = new HashMap<>(node.getParentPaths());
+        for (EventRecipient m: parents.keySet()) {
+            if (m instanceof PropertyEditor)
                 ((PropertyEditor) m).detach();
-            }
         }
     }
 }

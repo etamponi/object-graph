@@ -301,26 +301,43 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
-     * @param property
-     * @return
+     * Defines how to access to a local property
+     *
+     * The Node class does not specify how to access local property. This method returns the value of the property whose
+     * name is given as parameter. See {@link ObjectNode} or {@link ListNode} for a reference implementation.
+     *
+     * @param property the name of the local property
+     * @return the value of the property
      */
     protected abstract <T> T getLocal(String property);
 
     /**
-     * @param property
-     * @return
+     * Checks if the given property is present in the current object
+     *
+     * Consider that some methods throw exceptions if an invalid property name is given as parameter.
+     *
+     * @param property the name of the property
+     * @return {@code true} if the property is present; {@code false} in the opposite case
      */
     public boolean hasProperty(String property) {
         return getProperties().contains(property);
     }
 
     /**
-     * @return
+     * A list of property names
+     *
+     * @return a sorted list of all property names in the current object.
      */
     public abstract List<String> getProperties();
 
     /**
-     * @return
+     * A list of properties that are not controlled by any {@link Trigger}.
+     *
+     * Each trigger can define one or more "controlled" or "bound" properties. The concept of bound properties is
+     * particularly useful when coupled with dynamic GUI generation, as you can decide that bound properties should not
+     * show up in the user interface, or should be shown in read-only mode.
+     *
+     * @return a list of properties not controlled by any Trigger
      */
     public List<String> getFreeProperties() {
         List<String> ret = new ArrayList<>(getProperties());
@@ -329,7 +346,11 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
-     * @return
+     * A list of properties controlled by some {@link Trigger}
+     *
+     * See {@link #getFreeProperties()} as a reference.
+     *
+     * @return a list of properties controlled by at least one Trigger
      */
     public List<String> getControlledProperties() {
         List<String> ret = new ArrayList<>();
@@ -356,19 +377,45 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
-     * @return
+     * The current set of parents
+     *
+     * Returns a map whose keys are the current parents of this Node. Parents are automatically garbaged by the garbage
+     * collector, so the map returned by this method is the set of parents <i>at the time in which the method has been
+     * called</i>.
+     *
+     * @return a map whose keys are the parents and whose values are the properties with which the parent is connected
+     * to this Node
      */
     public Map<EventRecipient, Set<String>> getParentPaths() {
         return ParentRegistry.getParentPaths(this);
     }
 
     /**
-     * @param e
+     * Fires an {@link Event} starting from this node.
+     *
+     * With this method one can start the propagation of an Event from this node. To see how Nodes propagate Events, see
+     * {@link #handleEvent(Event, org.pcollections.PSet)}.
+     *
+     * This method is intended for internal use and should be used with great care.
+     *
+     * @param e the Event to fire
      */
-    protected void fireEvent(Event e) {
+    public void fireEvent(Event e) {
         handleEvent(e, HashTreePSet.<EventRecipient>singleton(this));
     }
 
+    /**
+     * Implements Event handling for Nodes: checks local {@link Trigger}s and propagates the received Event to parents
+     *
+     * Once an {@link Event} reachs this Node, every {@link Trigger} registered using {@link #addTrigger(Trigger)} is checked
+     * against the event, and triggered if necessary.
+     * <p/>
+     * After that, the event is propagated to every parent through the relative path. The second parameters is used to
+     * assure that the method doesn't loop if cycles are found.
+     *
+     * @param e the Event that reachs this object
+     * @param visited other objects already visited in the current dispatch chain of this Event.
+     */
     @Override
     public void handleEvent(Event e, PSet<EventRecipient> visited) {
         for (Trigger<?> t : triggers)
@@ -383,7 +430,12 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
-     * @param t
+     * Register a {@link Trigger} to this Node.
+     *
+     * Registering a Trigger means that the trigger will be checked for each Event that reaches this Node. The method also
+     * set the {@code node} field of the Trigger.
+     *
+     * @param t the Trigger to be registered
      */
     @SuppressWarnings("unchecked")
     public <N extends Node> void addTrigger(Trigger<N> t) {
@@ -392,7 +444,9 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
-     * @param t
+     * Removes a previously registered Trigger.
+     *
+     * @param t the Trigger to be unregistered
      */
     @SuppressWarnings("unchecked")
     public <N extends Node> void removeTrigger(Trigger<N> t) {
@@ -401,9 +455,11 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
-     * @param property
-     * @param runtime
-     * @return
+     * Returns the runtime or declared type for the given property
+     *
+     * @param property the name of the property
+     * @param runtime whether to check for the declared type or the runtime type
+     * @return the type of the property, or {@code null} if runtime is {@code true} and the property value is null
      */
     public Class<?> getPropertyType(String property, boolean runtime) {
         if (!hasProperty(property))
@@ -417,8 +473,10 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
-     * @param property
-     * @return
+     * Returns the declared property type for the given property
+     *
+     * @param property the name of the property
+     * @return the type with which the given property has been declared
      */
     protected abstract Class<?> getDeclaredPropertyType(String property);
 

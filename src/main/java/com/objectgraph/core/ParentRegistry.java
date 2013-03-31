@@ -69,7 +69,7 @@ class ParentRegistry {
     static Map<EventRecipient, Set<String>> getParentPaths(Node child) {
         if (!registry.containsKey(child))
             return Collections.emptyMap();
-        return registry.get(child);
+        return Collections.unmodifiableMap(registry.get(child));
     }
 
 }
