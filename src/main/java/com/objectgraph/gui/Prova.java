@@ -46,20 +46,13 @@ public class Prova {
     private static ProvaNode node = new ProvaNode();
 
     public static class ProvaNode extends ObjectNode {
-        @Property
-        protected String s;
-        @Property
-        protected int i;
-        @Property
-        protected double d;
-        @Property
-        protected float f;
-        @Property
-        protected short sh;
-        @Property
-        protected boolean b;
-        @Property
-        protected Node node;
+        @Property String s;
+        @Property int i;
+        @Property double d;
+        @Property float f;
+        @Property short sh;
+        @Property boolean b;
+        @Property Node node;
 
         public ProvaNode() {
             addConstraint(new Constraint<ProvaNode, Node>("node") {
@@ -117,7 +110,6 @@ public class Prova {
                     EditorManager.getBestEditor(node.getRootedProperty("sh"), false, true),
                     EditorManager.getBestEditor(node.getRootedProperty("b"), false, true)
             };
-            System.out.println(editors.length);
             PropertyEditor editor3 = new ImplementationChooserPropertyEditor().attach(node.getRootedProperty("node"));
 
             box = new VBox();
@@ -129,11 +121,7 @@ public class Prova {
                 }
             });
             box.getChildren().addAll(editor1, editor3, test);
-            int i = 0;
-            for (PropertyEditor editor : editors) {
-                System.out.println(i++);
-                box.getChildren().add(editor);
-            }
+            box.getChildren().addAll(editors);
 
             scene = new Scene(box);
             scene.getStylesheets().add("com/objectgraph/gui/objectgraphgui.css");

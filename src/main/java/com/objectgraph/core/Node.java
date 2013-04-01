@@ -128,8 +128,7 @@ public abstract class Node implements EventRecipient {
      * the constructor. For example, supposing that {@code Child} is a {@link Node} implementation:
      * <pre>
      *     public MyNode extends ObjectNode {
-     *         @Property
-     *         protected Child child = new Child(); // This is initialized outside the constructor, without set()
+     *         {@literal @}Property Child child = new Child(); // This is initialized outside the constructor, without set()
      *     }
      * </pre>
      * in this case, as you see, the property MyNode.child is not initialised using the {@link #set(String, Object)}
@@ -188,15 +187,13 @@ public abstract class Node implements EventRecipient {
      * To show how you can use this method, consider the following example:
      * <pre>
      *     public class MyChild extends ObjectNode {
-     *         @Property
-     *         protected String s;
+     *         {@literal @}Property String s;
      *          :
      *          :
      *     }
      *
      *     public class MyNode extends ObjectNode {
-     *         @Property
-     *         protected MyChild child;
+     *         {@literal @}Property MyChild child;
      *          :
      *          :
      *     }

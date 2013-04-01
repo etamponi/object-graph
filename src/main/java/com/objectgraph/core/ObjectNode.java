@@ -28,15 +28,90 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.*;
 
+/**
+ * A Node whose properties are its fields with the {@link Property} annotation.
+ * <p/>
+ * This is the main implementation of the {@link Node} class. By extending this class, you define as <i>properties</i>
+ * those fields of the subclass which are annotated with the tag @Property. You can define any field as a property, but
+ * it cannot be private.
+ * <p/>
+ * Let's explain with some examples:
+ * <pre>
+ *     public class MyChild extends ObjectNode {
+ *         {@literal @}Property double percent;
+ *         {@literal @}Property String description;
+ *
+ *         private String notProperty;
+ *          :
+ *          :
+ *     }
+ *
+ *     public class MyNode extends ObjectNode {
+ *         Property String text;
+ *         {@literal @}Property int number;
+ *         {@literal @}Property MyChild child;
+ *          :
+ *          :
+ *     }
+ *
+ *     public static void main(String... args) {
+ *         MyNode obj = new MyNode();
+ *         obj.set("text", "Hello, World");
+ *         obj.set("number", 123);
+ *         obj.set("child", new MyChild());
+ *         obj.set("child.percent", 0.34);
+ *         obj.set("child.description", "This is a MyChild object");
+ *
+ *         MyChild child = obj.get("child");
+ *         child.set("notProperty", "ERROR!"); // This will raise a RuntimeException
+ *          :
+ *          :
+ *     }
+ * </pre>
+ * You can define {@link Trigger}s in the constructor or attach them to an instance at any time. Consider that the Trigger
+ * will not be checked when registered, but only if a triggering {@link Event} reaches the Node <i>after</i> the Trigger
+ * has been registered.
+ * <p/>
+ * You can also define {@link ErrorCheck}s and {@link Constraint}s. These are particularly useful when coupled with a GUI
+ * or if you have a complex batch execution or a separate configuration file.
+ * <p/>
+ * For example:
+ * <pre>
+ *     public class MyNode extends Node {
+ *         {@literal @}Property String text;
+ *         {@literal @}Property int value;
+ *
+ *         public MyNode() {
+ *             addTrigger(new Dependency("text", "toText", "value"));
+ *             addErrorCheck(new RangeCheck("value", 200, 300));
+ *         }
+ *
+ *         protected String toText(int value) {
+ *             return "The value property is " + value;
+ *         }
+ *     }
+ *
+ *     public static void main(String... args) {
+ *         MyNode obj = new MyNode();
+ *         obj.set("value", 123);
+ *         System.out.println(obj.get("text")); // output: "The value property is 123"
+ *
+ *         Map{@literal <String, Set<Error>>} errors = node.getErrors();
+ *         if (!errors.isEmpty) {
+ *             for(String property: errors.keySet())
+ *                 System.out.println(property + ": " + errors.get(property).getMessage());
+ *         }
+ *     }
+ * </pre>
+ */
 public abstract class ObjectNode extends Node {
 
     /**
-     * @author Emanuele
+     * The annotation to use to add a property to an ObjectNode
      */
     @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)
-    protected @interface Property {
-    }
+    protected @interface Property {}
 
     private static class PropertyAccess {
 
@@ -85,11 +160,7 @@ public abstract class ObjectNode extends Node {
     @Override
     protected void setLocal(String property, Object content) {
         FieldAccess access = FieldAccess.get(getClass());
-        try {
-            access.set(this, property, content);
-        } catch (IllegalAccessError err) {
-            System.out.println("OH");
-        }
+        access.set(this, property, content);
     }
 
     @Override
