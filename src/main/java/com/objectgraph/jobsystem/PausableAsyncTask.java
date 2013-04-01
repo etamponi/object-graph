@@ -34,11 +34,11 @@ public class PausableAsyncTask<V> extends Task<V> implements Pausable {
         return (PausableAsyncTask<V>) threadTaskPairs.get(Thread.currentThread());
     }
 
-    static void putThreadTaskPair(Thread t, PausableAsyncTask<?> s) {
+    private static void putThreadTaskPair(Thread t, PausableAsyncTask<?> s) {
         threadTaskPairs.put(t, s);
     }
 
-    static void removeThreadTaskPair(Thread t) {
+    private static void removeThreadTaskPair(Thread t) {
         threadTaskPairs.remove(t);
     }
 
@@ -117,9 +117,9 @@ public class PausableAsyncTask<V> extends Task<V> implements Pausable {
                 } catch (InterruptedException ex) { /* stop observer */ }
             }
         });
-        t.start();
         try {
             updateProgress(0, 100);
+            t.start();
             PausableAsyncTask.putThreadTaskPair(Thread.currentThread(), PausableAsyncTask.this);
             MethodAccess access = MethodAccess.get(node.getClass());
             V ret = (V) access.invoke(node, jobName, params);
