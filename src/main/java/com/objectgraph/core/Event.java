@@ -21,30 +21,57 @@ package com.objectgraph.core;
 
 import com.objectgraph.utils.PathUtils;
 
+/**
+ *
+ */
 public class Event {
 
     private final String path;
 
     private final EventType type;
 
+    /**
+     *
+     * @param path
+     * @param type
+     */
     public Event(String path, EventType type) {
         this.path = path;
         this.type = type;
     }
 
+    /**
+     *
+     * @return
+     */
     public String getPath() {
         return path;
     }
 
+    /**
+     *
+     * @return
+     */
     public EventType getType() {
         return type;
     }
 
+    /**
+     *
+     * @param cls
+     * @param <ET>
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public <ET extends EventType> ET getType(Class<ET> cls) {
         return (ET) type;
     }
 
+    /**
+     *
+     * @param parent
+     * @return
+     */
     public Event backPropagate(String parent) {
         return new Event(PathUtils.appendPath(parent, path), type);
     }

@@ -19,8 +19,46 @@
 
 package com.objectgraph.core;
 
+/**
+ * Base class for the hint-based error system
+ * <p/>
+ * To understand the usefulness of this class and of the hint-based error system, consider how you should solve configuration
+ * errors when using a GUI or some other approaches that let the user set some parameters without the possibility of
+ * compile-time error checking. You want that the user is notified in some way that the configuration options that her
+ * has used are invalid, either because they're not valid one by one or they are not consistent with each other. When using
+ * a GUI, you don't want that the program is interrupted or the workflow gets stopped, because the current configuration
+ * might be a work-in-progress, as the user has still not completed it or has just messed around and don't know how to fix
+ * things. You want that some hints appear, that help the user fix the errors in the configuration. Perhaps you want to
+ * block some actions until the errors are fixed, but in general you don't want to throw exceptions or such things.
+ * <p/>
+ * In these cases, the hint-based error system may come in your help. By using {@link Node#addErrorCheck(ErrorCheck)} or
+ * {@link Node#addConstraint(Constraint)}, you can add error checks to the configuration of the relative Node. For example,
+ * consider a {@link ObjectNode} that has a property {@code percent} of type {@code int} and you want that property to stay
+ * between 0 and 100. You can do the following:
+ * <pre>
+ *     public class Example extends ObjectNode {
+ *         {@literal @}Property int percent;
+ *
+ *         public Example() {
+ *             addErrorCheck(new RangeCheck("percent", 0, 100));
+ *         }
+ *     }
+ * </pre>
+ * This way, you can still set {@code percent} with any integer, but if you invoke {@link com.objectgraph.core.Node#getErrors()},
+ * you obtain a map that contains, for every property of the Node, a set of configuration errors. You could display it in
+ * some way, by either showing it on an list view or by changing the color of the editor, or in any way you want.
+ * <p/>
+ * As any other {@link NodeHelper}, you can access the Node that registered the ErrorCheck through {@link #getNode()}.
+ *
+ * @param <N> The subtype of {@link Node} to which you want this ErrorCheck to be registered
+ */
 public abstract class ErrorCheck<N extends Node> extends NodeHelper<N> {
 
+    /**
+     * Return the configuration {@link Error}.
+     *
+     * @return an {@link Error} instance, or {@code null} if this ErrorCheck shouldn't apply
+     */
     public abstract Error getError();
 
 }

@@ -19,6 +19,9 @@
 
 package com.objectgraph.core;
 
+/**
+ *
+ */
 public class Error {
 
     public enum ErrorLevel {

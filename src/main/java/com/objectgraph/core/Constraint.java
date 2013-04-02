@@ -22,6 +22,11 @@ package com.objectgraph.core;
 import java.util.List;
 import java.util.ListIterator;
 
+/**
+ *
+ * @param <N>
+ * @param <T>
+ */
 public abstract class Constraint<N extends Node, T> extends ErrorCheck<N> {
 
     private final String path;
@@ -48,6 +53,10 @@ public abstract class Constraint<N extends Node, T> extends ErrorCheck<N> {
             return null;
     }
 
+    /**
+     *
+     * @param list
+     */
     public final void filter(List<T> list) {
         ListIterator<T> it = list.listIterator();
         while (it.hasNext()) {

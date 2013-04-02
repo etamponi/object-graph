@@ -27,18 +27,16 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
 public class ObjectNodeTest {
 	
 	public static class NodeExampleBase extends ObjectNode {
-		@Property
-		protected int property1;
-		@Property
-		protected String property2;
-		@Property
-		protected NodeExampleChild property3;
+		@Property int property1;
+		@Property String property2;
+		@Property NodeExampleChild property3;
 		
 		protected NodeExampleChild falseProperty;
 		
@@ -105,10 +103,12 @@ public class ObjectNodeTest {
 		assertEquals(new StringList("property2"), child.getControlledProperties());
 		assertEquals(0.0, child.get("property2"));
 		
-		Map<String, Error> errors = base.getErrors();
+		Map<String,Set<Error>> errors = base.getErrors();
 		assertEquals(1, errors.size());
-		assertEquals("property2: still not set to \"enabled\"", errors.values().iterator().next().getMessage());
-		assertEquals("property2: still not set to \"enabled\" (warning)", errors.values().iterator().next().toString());
+        assertEquals(1, errors.values().iterator().next());
+        Error error = errors.values().iterator().next().iterator().next();
+		assertEquals("property2: still not set to \"enabled\"", error.getMessage());
+		assertEquals("property2: still not set to \"enabled\" (warning)", error.toString());
 		
 		base.set("property2", "enable");
 		assertEquals(3.1415, child.get("property2"));
