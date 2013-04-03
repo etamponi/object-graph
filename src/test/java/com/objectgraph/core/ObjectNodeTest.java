@@ -105,7 +105,7 @@ public class ObjectNodeTest {
 		
 		Map<String,Set<Error>> errors = base.getErrors();
 		assertEquals(1, errors.size());
-        assertEquals(1, errors.values().iterator().next());
+        assertEquals(1, errors.values().iterator().next().size());
         Error error = errors.values().iterator().next().iterator().next();
 		assertEquals("property2: still not set to \"enabled\"", error.getMessage());
 		assertEquals("property2: still not set to \"enabled\" (warning)", error.toString());
