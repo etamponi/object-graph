@@ -21,9 +21,8 @@ package com.objectgraph.gui;
 
 
 import com.google.common.base.Strings;
-import com.objectgraph.core.Constraint;
-import com.objectgraph.core.Node;
-import com.objectgraph.core.ObjectNode;
+import com.objectgraph.core.*;
+import com.objectgraph.core.Error;
 import com.objectgraph.core.triggers.Assignment;
 import com.objectgraph.gui.editors.ImplementationChooserPropertyEditor;
 import com.objectgraph.gui.editors.StringPropertyEditor;
@@ -57,12 +56,12 @@ public class Prova {
         public ProvaNode() {
             addConstraint(new Constraint<ProvaNode, Node>("node") {
                 @Override
-                protected String check(Node element) {
+                public Error getError(Node element) {
                     if (Strings.nullToEmpty(getNode().s).equals("Automatic message")) {
                         if (element instanceof ProvaNode)
                             return null;
                         else
-                            return "should be an instance of ProvaNode";
+                            return new Error(Error.ErrorLevel.SEVERE, "should be an instance of ProvaNode");
                     } else
                         return null;
                 }

@@ -26,7 +26,7 @@ public abstract class NodeHelper<N extends Node> {
     private N node;
 
     void setNode(N node) {
-        if (this.node != null)
+        if (this.node != null && this.node != node)
             throw new NodeHelperAlreadyUsedException(this, this.node);
         this.node = node;
     }

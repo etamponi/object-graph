@@ -64,11 +64,10 @@ public class ObjectNodeTest {
 				
 			});
 			
-			addErrorCheck(new ErrorCheck<NodeExampleBase>() {
-
+			addErrorCheck(new ErrorCheck<NodeExampleBase, String>("property2") {
 				@Override
-				public Error getError() {
-					if ("enabled".equals(getNode().property2))
+				public Error getError(String value) {
+					if ("enabled".equals(value))
 						return null;
 					else
 						return new Error(ErrorLevel.WARNING, "property2: still not set to \"enabled\"");

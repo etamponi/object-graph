@@ -29,6 +29,7 @@ import org.objenesis.instantiator.ObjectInstantiator;
 import org.objenesis.strategy.InstantiatorStrategy;
 import org.objenesis.strategy.StdInstantiatorStrategy;
 import org.pcollections.HashTreePSet;
+import org.pcollections.MapPSet;
 import org.pcollections.PSet;
 
 import java.util.*;
@@ -84,7 +85,7 @@ public abstract class Node implements EventRecipient {
 
     private final Set<Trigger<?>> triggers = new HashSet<>();
 
-    private final Set<ErrorCheck<?>> errorChecks = new HashSet<>();
+    private final Map<String, Set<ErrorCheck<?, ?>>> errorChecks = new HashMap<>();
 
     private final Map<String, Set<Constraint<?, ?>>> constraints = new HashMap<>();
 
@@ -481,9 +482,11 @@ public abstract class Node implements EventRecipient {
      * @param e the ErrorCheck to be registered
      */
     @SuppressWarnings("unchecked")
-    public <N extends Node> void addErrorCheck(ErrorCheck<N> e) {
+    public <N extends Node> void addErrorCheck(ErrorCheck<N, ?> e) {
         e.setNode((N) this);
-        errorChecks.add(e);
+        if (!errorChecks.containsKey(e.getPath()))
+            errorChecks.put(e.getPath(), new HashSet<ErrorCheck<?, ?>>());
+        errorChecks.get(e.getPath()).add(e);
     }
 
     /**
@@ -491,9 +494,13 @@ public abstract class Node implements EventRecipient {
      *
      * @param e the ErrorCheck to be removed
      */
-    public void removeErrorCheck(ErrorCheck<?> e) {
-        if (errorChecks.remove(e))
-            e.setNode(null);
+    public void removeErrorCheck(ErrorCheck<?, ?> e) {
+        if (e.getNode() != this)
+            return; // TODO throw exception
+        errorChecks.get(e.getPath()).remove(e);
+        if (errorChecks.get(e.getPath()).isEmpty())
+            errorChecks.remove(e.getPath());
+        e.setNode(null);
     }
 
     /**
@@ -511,12 +518,15 @@ public abstract class Node implements EventRecipient {
         if (seen.contains(this))
             return;
         seen.add(this);
-        for (ErrorCheck<?> check : errorChecks) {
-            Error error = check.getError();
-            if (error != null) {
-                if (!errors.containsKey(path))
-                    errors.put(path, new HashSet<Error>());
-                errors.get(path).add(error);
+        for (Set<ErrorCheck<?, ?>> checks : errorChecks.values()) {
+            for (ErrorCheck<?, ?> check: checks) {
+                Error error = check.getError();
+                if (error != null) {
+                    String completePath = PathUtils.appendPath(path, check.getPath());
+                    if (!errors.containsKey(completePath))
+                        errors.put(completePath, new HashSet<Error>());
+                    errors.get(completePath).add(error);
+                }
             }
         }
         for (String property : getProperties()) {
@@ -543,7 +553,7 @@ public abstract class Node implements EventRecipient {
             constraints.put(constraint.getPath(), new HashSet<Constraint<?, ?>>());
 
         constraints.get(constraint.getPath()).add(constraint);
-        errorChecks.add(constraint);
+        addErrorCheck(constraint);
     }
 
     /**
@@ -556,8 +566,7 @@ public abstract class Node implements EventRecipient {
         if (constraints.containsKey(path) && constraints.get(path).remove(constraint)) {
             if (constraints.get(path).isEmpty())
                 constraints.remove(path);
-            errorChecks.remove(constraint);
-            constraint.setNode(null);
+            removeErrorCheck(constraint);
         }
     }
 
@@ -573,12 +582,12 @@ public abstract class Node implements EventRecipient {
             throw new PropertyNotExistsException(new RootedProperty(this, property));
 
         List<Constraint<?, ?>> list = new ArrayList<>();
-        getConstraints(property, list, HashTreePSet.<EventRecipient>empty());
+        getConstraints(property, list, HashTreePSet.<Node>empty());
 
         return PluginManager.getImplementations(getPropertyType(property, false), list);
     }
 
-    private void getConstraints(String path, List<Constraint<?, ?>> list, PSet<EventRecipient> seen) {
+    private void getConstraints(String path, List<Constraint<?, ?>> list, PSet<Node> seen) {
         for(String constrainedPath: constraints.keySet()) {
             if (PathUtils.samePath(constrainedPath, path))
                 list.addAll(constraints.get(constrainedPath));
@@ -589,6 +598,31 @@ public abstract class Node implements EventRecipient {
                 Node parent = (Node)p;
                 for (String parentPath : getParentPaths().get(parent))
                     parent.getConstraints(PathUtils.appendPath(parentPath, path), list, seen.plus(parent));
+            }
+        }
+    }
+
+    public List<ErrorCheck<?, ?>> getErrorChecks(String property) {
+        if (!hasProperty(property))
+            throw new PropertyNotExistsException(new RootedProperty(this, property));
+
+        List<ErrorCheck<?, ?>> list = new ArrayList<>();
+        getErrorChecks(property, list, HashTreePSet.<Node>empty());
+
+        return list;
+    }
+
+    private void getErrorChecks(String path, List<ErrorCheck<?, ?>> list, PSet<Node> seen) {
+        for(String constrainedPath: errorChecks.keySet()) {
+            if (PathUtils.samePath(constrainedPath, path))
+                list.addAll(errorChecks.get(constrainedPath));
+        }
+
+        for (EventRecipient p : getParentPaths().keySet()) {
+            if (p instanceof Node && !seen.contains(p)) {
+                Node parent = (Node)p;
+                for (String parentPath : getParentPaths().get(parent))
+                    parent.getErrorChecks(PathUtils.appendPath(parentPath, path), list, seen.plus(parent));
             }
         }
     }

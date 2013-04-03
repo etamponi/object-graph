@@ -27,30 +27,18 @@ import java.util.ListIterator;
  * @param <N>
  * @param <T>
  */
-public abstract class Constraint<N extends Node, T> extends ErrorCheck<N> {
-
-    private final String path;
+public abstract class Constraint<N extends Node, T> extends ErrorCheck<N, T> {
 
     public Constraint(String path) {
-        this.path = path;
+        super(path);
     }
-
-    public String getPath() {
-        return path;
-    }
-
-    protected abstract String check(T element);
 
     @Override
     public Error getError() {
-        T value = getNode().get(path);
+        T value = getNode().get(getPath());
         if (value == null)
             return null;
-        String check = check((T) value);
-        if (check != null)
-            return new Error(Error.ErrorLevel.SEVERE, path + ": " + check);
-        else
-            return null;
+        return getError(value);
     }
 
     /**
@@ -61,7 +49,7 @@ public abstract class Constraint<N extends Node, T> extends ErrorCheck<N> {
         ListIterator<T> it = list.listIterator();
         while (it.hasNext()) {
             T t = it.next();
-            if (check(t) != null)
+            if (getError(t) != null)
                 it.remove();
         }
     }

@@ -52,13 +52,32 @@ package com.objectgraph.core;
  *
  * @param <N> The subtype of {@link Node} to which you want this ErrorCheck to be registered
  */
-public abstract class ErrorCheck<N extends Node> extends NodeHelper<N> {
+public abstract class ErrorCheck<N extends Node, T> extends NodeHelper<N> {
+
+    private final String path;
+
+    public ErrorCheck(String path) {
+        this.path = path;
+    }
+
+    public String getPath() {
+        return path;
+    }
 
     /**
-     * Return the configuration {@link Error}.
+     * Return the configuration {@link Error} using the current value.
      *
      * @return an {@link Error} instance, or {@code null} if this ErrorCheck shouldn't apply
      */
-    public abstract Error getError();
+    public Error getError() {
+        return getError((T) getNode().get(path));
+    }
+
+    /**
+     *
+     * @param value
+     * @return
+     */
+    public abstract Error getError(T value);
 
 }
