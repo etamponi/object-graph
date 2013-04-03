@@ -95,4 +95,20 @@ public class PathUtils {
         return true;
     }
 
+    public static boolean samePath(String path1, String path2) {
+        if (path1.isEmpty())
+            return path2.isEmpty();
+        String[] tokens1 = path1.split("\\.");
+        String[] tokens2 = path2.split("\\.");
+        if (tokens1.length != tokens2.length)
+            return false;
+        for (int i = 0; i < tokens1.length; i++) {
+            if (tokens1[i].equals("*") || tokens2[i].equals("*") || tokens1[i].equals(tokens2[i]))
+                continue;
+            else
+                return false;
+        }
+        return true;
+    }
+
 }
