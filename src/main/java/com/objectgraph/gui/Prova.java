@@ -154,23 +154,22 @@ public class Prova {
     public static void main(String[] args) throws Exception {
         PluginManager.initialise(new PluginConfiguration("com.objectgraph"));
         Application.launch(MyApp.class);
-        ReferenceQueue<Scene> q = new ReferenceQueue<Scene>();
-        WeakReference<Scene> scene = new WeakReference<Scene>(MyApp.scene, q);
+        WeakReference<Scene> scene = new WeakReference<Scene>(MyApp.scene);
         MyApp.scene = null;
         System.out.println(node.getErrors());
         System.out.println(node.b);
         int i = 1;
         ProvaNode n = new ProvaNode();
         provaParent(n);
-        while (n.getFreeProperties().size() != n.getProperties().size() || !node.getParentPaths().isEmpty()) {
+        while (!n.getControlledProperties().isEmpty() || !node.getParentPaths().isEmpty()) {
             System.out.println((i++) + " " + node.getParentPaths());
             if (i > 1000)
                 System.gc();
+            if (i > 1100)
+                EditorManager.detachAllEditors(node);
 
             System.out.println(scene.get());
         }
-//        EditorManager.detachAllEditors(node);
-        q.poll();
         System.out.println(node.getParentPaths());
 
         System.out.println("Finished!");

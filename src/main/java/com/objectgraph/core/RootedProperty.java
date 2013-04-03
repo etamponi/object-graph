@@ -60,9 +60,13 @@ public class RootedProperty {
     }
 
     public List<Error> getErrors() {
+        return getErrors(getValue());
+    }
+
+    public List<Error> getErrors(Object value) {
         List<Error> ret = new ArrayList<>();
-        for (ErrorCheck<?,?> check: errorChecks) {
-            Error error = check.getError();
+        for (ErrorCheck check: errorChecks) {
+            Error error = check.getError(value);
             if (error != null) {
                 ret.add(error);
             }

@@ -72,7 +72,7 @@ public abstract class TextFieldBasedPropertyEditor<T> extends PropertyEditor {
         textField.getStyleClass().removeAll("text-field-editor-changed", "text-field-editor-invalid", "text-field-editor");
         if (getModel() != null) {
             if (isValid(text)) {
-                if (!getModel().getErrors().isEmpty()) {
+                if (!getModel().getErrors(fromTextToModel(text)).isEmpty()) {
                     textField.getStyleClass().add("text-field-editor-invalid");
                 } else {
                     String curValue = fromModelToText((T) getModel().getValue());

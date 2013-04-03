@@ -33,7 +33,7 @@ public abstract class NodeHelper<N extends Node> {
 
         if (this.node != null && this.node.get() != node)
             throw new NodeHelperAlreadyUsedException(this, this.node.get());
-        this.node = new WeakReference<N>(node);
+        this.node = new WeakReference<>(node);
     }
 
     protected N getNode() {
