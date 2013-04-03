@@ -93,9 +93,7 @@ public abstract class Node implements EventRecipient {
     static {
         kryo = new Kryo() {
             InstantiatorStrategy s = new StdInstantiatorStrategy();
-
-            @Override
-            protected ObjectInstantiator newInstantiator(final Class type) {
+            @Override protected ObjectInstantiator newInstantiator(final Class type) {
                 if (Node.class.isAssignableFrom(type))
                     return s.newInstantiatorOf(type);
                 else
