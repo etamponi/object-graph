@@ -26,10 +26,12 @@ public class RootedProperty {
 
     private final WeakReference<Node> root;
     private final String path;
+    private final List<ErrorCheck<?, ?>> errorChecks;
 
     RootedProperty(Node root, String path) {
         this.root = new WeakReference<>(root);
         this.path = path;
+        errorChecks = root.getErrorChecks(path);
     }
 
     public Node getRoot() {
@@ -54,6 +56,15 @@ public class RootedProperty {
 
     public Class<?> getValueType(boolean runtime) {
         return root.get().getPropertyType(path, runtime);
+    }
+
+    public List<ErrorCheck<?, ?>> getErrorChecks() {
+        return errorChecks;
+    }
+
+    public void updateErrorChecks() {
+        errorChecks.clear();
+        errorChecks.addAll(root.get().getErrorChecks(path));
     }
 
     @Override

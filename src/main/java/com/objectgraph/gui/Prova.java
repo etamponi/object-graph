@@ -66,6 +66,15 @@ public class Prova {
                         return null;
                 }
             });
+            addErrorCheck(new ErrorCheck<Node, Object>("i") {
+                @Override
+                public Error getError(Object value) {
+                    if (value == 12)
+                        return null;
+                    else
+                        return new Error(Error.ErrorLevel.WARNING, "value should be 12");
+                }
+            });
         }
     }
 
