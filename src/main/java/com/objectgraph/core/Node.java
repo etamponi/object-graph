@@ -581,8 +581,10 @@ public abstract class Node implements EventRecipient {
     }
 
     private void getConstraints(String path, List<Constraint<?, ?>> list, PSet<EventRecipient> seen) {
-        if (constraints.containsKey(path))
-            list.addAll(constraints.get(path));
+        for(String constrainedPath: constraints.keySet()) {
+            if (PathUtils.samePath(constrainedPath, path))
+                list.addAll(constraints.get(constrainedPath));
+        }
 
         for (EventRecipient p : getParentPaths().keySet()) {
             if (p instanceof Node && !seen.contains(p)) {
