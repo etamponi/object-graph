@@ -21,23 +21,28 @@ package com.objectgraph.core;
 
 import com.objectgraph.core.exceptions.NodeHelperAlreadyUsedException;
 
+import java.lang.ref.WeakReference;
+
 public abstract class NodeHelper<N extends Node> {
 
-    private N node;
+    private WeakReference<N> node;
 
     void setNode(N node) {
-        if (this.node != null && this.node != node)
-            throw new NodeHelperAlreadyUsedException(this, this.node);
-        this.node = node;
+        if (node == null)
+            this.node = null;
+
+        if (this.node != null && this.node.get() != node)
+            throw new NodeHelperAlreadyUsedException(this, this.node.get());
+        this.node = new WeakReference<N>(node);
     }
 
     protected N getNode() {
-        return node;
+        return node.get();
     }
 
     @SuppressWarnings("unchecked")
     protected <NN extends Node> NN getNode(Class<NN> type) {
-        return (NN) node;
+        return (NN) node.get();
     }
 
 }
