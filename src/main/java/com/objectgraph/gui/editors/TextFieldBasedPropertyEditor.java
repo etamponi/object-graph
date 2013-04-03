@@ -19,7 +19,6 @@
 
 package com.objectgraph.gui.editors;
 
-import com.objectgraph.core.ErrorCheck;
 import com.objectgraph.core.Event;
 import com.objectgraph.core.eventtypes.changes.SetProperty;
 import com.objectgraph.gui.PropertyEditor;
@@ -32,8 +31,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 
 public abstract class TextFieldBasedPropertyEditor<T> extends PropertyEditor {
@@ -75,8 +72,7 @@ public abstract class TextFieldBasedPropertyEditor<T> extends PropertyEditor {
         textField.getStyleClass().removeAll("text-field-editor-changed", "text-field-editor-invalid", "text-field-editor");
         if (getModel() != null) {
             if (isValid(text)) {
-                boolean errors = applyErrorChecks(fromTextToModel(text));
-                if (errors) {
+                if (!getModel().getErrors().isEmpty()) {
                     textField.getStyleClass().add("text-field-editor-invalid");
                 } else {
                     String curValue = fromModelToText((T) getModel().getValue());
@@ -89,13 +85,6 @@ public abstract class TextFieldBasedPropertyEditor<T> extends PropertyEditor {
                 textField.getStyleClass().add("text-field-editor-invalid");
             }
         }
-    }
-
-    private boolean applyErrorChecks(T value) {
-        for(ErrorCheck check: getModel().getErrorChecks())
-            if (check.getError(value) != null)
-                return true;
-        return false;
     }
 
     @Override

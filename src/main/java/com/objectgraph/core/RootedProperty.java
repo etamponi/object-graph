@@ -20,6 +20,7 @@
 package com.objectgraph.core;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
 
 public class RootedProperty {
@@ -58,8 +59,15 @@ public class RootedProperty {
         return root.get().getPropertyType(path, runtime);
     }
 
-    public List<ErrorCheck<?, ?>> getErrorChecks() {
-        return errorChecks;
+    public List<Error> getErrors() {
+        List<Error> ret = new ArrayList<>();
+        for (ErrorCheck<?,?> check: errorChecks) {
+            Error error = check.getError();
+            if (error != null) {
+                ret.add(error);
+            }
+        }
+        return ret;
     }
 
     public void updateErrorChecks() {
