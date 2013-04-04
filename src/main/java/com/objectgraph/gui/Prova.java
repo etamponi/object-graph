@@ -38,7 +38,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 
 public class Prova {
@@ -153,6 +152,7 @@ public class Prova {
 
     public static void main(String[] args) throws Exception {
         PluginManager.initialise(new PluginConfiguration("com.objectgraph"));
+
         Application.launch(MyApp.class);
         WeakReference<Scene> scene = new WeakReference<Scene>(MyApp.scene);
         MyApp.scene = null;

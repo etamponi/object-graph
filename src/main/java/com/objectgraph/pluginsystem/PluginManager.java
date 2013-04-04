@@ -24,6 +24,7 @@ import com.objectgraph.core.Node;
 import com.objectgraph.pluginsystem.exceptions.PluginManagerAlreadyInitializedException;
 import com.objectgraph.pluginsystem.exceptions.PluginManagerNotInitializedException;
 import com.objectgraph.utils.ClassUtils;
+import javafx.fxml.FXMLLoader;
 import org.reflections.Reflections;
 
 import java.io.File;
@@ -36,7 +37,7 @@ import java.util.*;
 public class PluginManager {
 
     private static PluginConfiguration configuration = null;
-    private static ClassLoader classLoader = PluginManager.class.getClassLoader();
+    private static ClassLoader classLoader = FXMLLoader.getDefaultClassLoader();
     private static Reflections internal = null;
 
     private PluginManager() {
@@ -74,7 +75,7 @@ public class PluginManager {
                 // Do not do anything
             }
         }
-        classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
+        classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), classLoader);
         Set<String> packages = new HashSet<>();
         for (String p : configuration.packages) {
             if (p != null)
