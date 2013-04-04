@@ -59,8 +59,9 @@ public class ListNode<E> extends Node implements List<E> {
 
     @Override
     public boolean addAll(int index, Collection<? extends E> c) {
-        if (c.isEmpty())
+        if (c.isEmpty()) {
             return false;
+        }
 
         List<E> elements = new ArrayList<>(c);
         List<Integer> indices = new ArrayList<>(c.size());
@@ -159,10 +160,11 @@ public class ListNode<E> extends Node implements List<E> {
     @Override
     public boolean remove(Object o) {
         int index = list.indexOf(o);
-        if (index < 0)
+        if (index < 0) {
             return false;
-        else
+        } else {
             remove(index);
+        }
         return true;
     }
 
@@ -204,10 +206,11 @@ public class ListNode<E> extends Node implements List<E> {
                 indices.add(index);
 
                 int next = list.subList(index + 1, list.size()).indexOf(element);
-                if (next < 0)
+                if (next < 0) {
                     index = -1;
-                else
+                } else {
                     index = index + next + 1;
+                }
             }
         }
 
@@ -236,7 +239,9 @@ public class ListNode<E> extends Node implements List<E> {
     public boolean retainAll(Collection<?> c) {
         List<E> elements = new ArrayList<>(list);
         List<Integer> indices = new ArrayList<>(list.size());
-        for (int i = 0; i < list.size(); i++) indices.add(i);
+        for (int i = 0; i < list.size(); i++) {
+            indices.add(i);
+        }
 
         for (Object element : c) {
             int index = list.indexOf(element);
@@ -245,10 +250,11 @@ public class ListNode<E> extends Node implements List<E> {
                 indices.remove(index);
 
                 int next = list.subList(index + 1, list.size()).indexOf(element);
-                if (next < 0)
+                if (next < 0) {
                     index = -1;
-                else
+                } else {
                     index = index + next + 1;
+                }
             }
         }
 
@@ -325,8 +331,9 @@ public class ListNode<E> extends Node implements List<E> {
     // Used by ListNodeIterator
     protected void updatePropertyList() {
         properties.clear();
-        for (int i = 0; i < list.size(); i++)
+        for (int i = 0; i < list.size(); i++) {
             properties.add(String.valueOf(i));
+        }
     }
 
     @Override
@@ -334,8 +341,9 @@ public class ListNode<E> extends Node implements List<E> {
         if (path.startsWith("*.")) {
             String remainingPath = path.substring(2);
             for (E element : list) {
-                if (element != null)
+                if (element != null) {
                     ((Node) element).set(remainingPath, content);
+                }
             }
         } else {
             super.set(path, content);
@@ -352,10 +360,11 @@ public class ListNode<E> extends Node implements List<E> {
             } else {
                 String remainingPath = path.substring(2);
                 for (E element : list) {
-                    if (element != null)
+                    if (element != null) {
                         ret.add(((Node) element).get(remainingPath));
-                    else
+                    } else {
                         ret.add(null);
+                    }
                 }
             }
             return (T) ret;

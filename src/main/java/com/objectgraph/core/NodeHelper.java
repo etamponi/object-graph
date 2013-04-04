@@ -19,8 +19,6 @@
 
 package com.objectgraph.core;
 
-import com.objectgraph.core.exceptions.NodeHelperUsedByOtherException;
-
 import java.lang.ref.WeakReference;
 
 public abstract class NodeHelper<N extends Node> {

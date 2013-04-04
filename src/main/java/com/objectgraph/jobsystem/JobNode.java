@@ -41,12 +41,13 @@ public abstract class JobNode extends ObjectNode {
     @Target(ElementType.METHOD)
     protected @interface Job { }
 
-    private static final Map<Class<?>, Map<String, JobInfo>> classJobInfos = new HashMap<>();
-    private static final Map<Class<?>, List<String>> classJobs = new HashMap<>();
+    private static final Map<Class<?>, Map<String, JobInfo>> CLASS_JOB_INFOS = new HashMap<>();
+    private static final Map<Class<?>, List<String>> CLASS_JOBS = new HashMap<>();
 
-    private static final Map<Thread, LinkedList<JobInfo>> threadJobs = new HashMap<>();
+    private static final Map<Thread, LinkedList<JobInfo>> THREAD_JOBS = new HashMap<>();
+    private static final Object THREAD_JOBS_LOCK = new Object();
 
-    private static final Object lock = new Object();
+    private static final int CALLER_METHOD = 2;
 
     public JobNode() {
         prepareJobs(getClass());
@@ -62,33 +63,37 @@ public abstract class JobNode extends ObjectNode {
         if (Thread.currentThread() instanceof PausableThread) {
             try {
                 PausableThread thread = (PausableThread) Thread.currentThread();
-                if (!thread.isPaused())
+                if (!thread.isPaused()) {
                     cleanUp();
+                }
                 thread.waitWhilePaused();
             } catch (InterruptedException ex) {
                 cleanUp();
             }
-            return; // No interruption, just pause
+            // No interruption, just pause
+            return;
         }
 
         PausableAsyncTask<?> task = PausableAsyncTask.getTaskFromThread();
         if (task != null) {
             try {
-                if (!task.isPaused())
+                if (!task.isPaused()) {
                     cleanUp();
+                }
                 task.waitWhilePaused();
             } catch (InterruptedException ex) {
                 cleanUp();
             }
-            return; // No interruption, just pause
+            // No interruption, just pause
+            return;
         }
 
         cleanUp();
     }
 
     private static void cleanUp() {
-        synchronized (lock) {
-            threadJobs.get(Thread.currentThread()).clear();
+        synchronized (THREAD_JOBS_LOCK) {
+            THREAD_JOBS.get(Thread.currentThread()).clear();
         }
         throw new JobInterruptedException();
     }
@@ -103,62 +108,69 @@ public abstract class JobNode extends ObjectNode {
 
     protected void startJob() {
         checkForPauseOrInterruption();
-        synchronized (lock) {
+        synchronized (THREAD_JOBS_LOCK) {
             Thread current = Thread.currentThread();
-            if (!threadJobs.containsKey(current))
-                threadJobs.put(current, new LinkedList<JobInfo>());
-            String jobName = current.getStackTrace()[2].getMethodName();
-            int callPosition = current.getStackTrace()[3].getLineNumber();
-            threadJobs.get(current).addLast(getJobInfos().get(jobName).instantiate(callPosition));
+            if (!THREAD_JOBS.containsKey(current)) {
+                THREAD_JOBS.put(current, new LinkedList<JobInfo>());
+            }
+            String jobName = current.getStackTrace()[CALLER_METHOD].getMethodName();
+            int callPosition = current.getStackTrace()[CALLER_METHOD+1].getLineNumber();
+            THREAD_JOBS.get(current).addLast(getJobInfos().get(jobName).instantiate(callPosition));
         }
     }
 
     protected void endJob() {
         checkForPauseOrInterruption();
-        synchronized (lock) {
+        synchronized (THREAD_JOBS_LOCK) {
             Thread current = Thread.currentThread();
-            threadJobs.get(current).removeLast();
-            if (threadJobs.get(current).isEmpty())
-                threadJobs.remove(current);
+            THREAD_JOBS.get(current).removeLast();
+            if (THREAD_JOBS.get(current).isEmpty()) {
+                THREAD_JOBS.remove(current);
+            }
         }
     }
 
     protected void startCycle(int currentRun, int totalRuns) {
-        if (totalRuns <= 0)
+        if (totalRuns <= 0) {
             totalRuns = 1;
-        if (currentRun >= totalRuns)
+        }
+        if (currentRun >= totalRuns) {
             currentRun = totalRuns - 1;
+        }
         checkForPauseOrInterruption();
-        synchronized (lock) {
+        synchronized (THREAD_JOBS_LOCK) {
             Thread current = Thread.currentThread();
             String jobName = current.getStackTrace()[2].getMethodName();
             int currentLine = current.getStackTrace()[2].getLineNumber();
             CycleInfo info = getJobInfos().get(jobName).getCycles().get(currentLine).instantiate(currentRun, totalRuns, "");
-            threadJobs.get(current).getLast().getCurrentCycles().addLast(info);
+            THREAD_JOBS.get(current).getLast().getCurrentCycles().addLast(info);
         }
     }
 
     protected void startCycle(String description, int currentRun, int totalRuns) {
-        if (totalRuns <= 0)
+        if (totalRuns <= 0) {
             totalRuns = 1;
-        if (currentRun < 0)
+        }
+        if (currentRun < 0) {
             currentRun = 0;
-        if (currentRun >= totalRuns)
+        }
+        if (currentRun >= totalRuns) {
             currentRun = totalRuns - 1;
+        }
         checkForPauseOrInterruption();
-        synchronized (lock) {
+        synchronized (THREAD_JOBS_LOCK) {
             Thread current = Thread.currentThread();
             String jobName = current.getStackTrace()[2].getMethodName();
             int currentLine = current.getStackTrace()[2].getLineNumber();
             CycleInfo info = getJobInfos().get(jobName).getCycles().get(currentLine).instantiate(currentRun, totalRuns, description);
-            threadJobs.get(current).getLast().getCurrentCycles().addLast(info);
+            THREAD_JOBS.get(current).getLast().getCurrentCycles().addLast(info);
         }
     }
 
     protected void endCycle() {
         checkForPauseOrInterruption();
-        synchronized (lock) {
-            threadJobs.get(Thread.currentThread()).getLast().getCurrentCycles().removeLast();
+        synchronized (THREAD_JOBS_LOCK) {
+            THREAD_JOBS.get(Thread.currentThread()).getLast().getCurrentCycles().removeLast();
         }
     }
 
@@ -171,7 +183,7 @@ public abstract class JobNode extends ObjectNode {
     }
 
     public static int getProgress(Thread worker) throws TryLaterException {
-        synchronized (lock) {
+        synchronized (THREAD_JOBS_LOCK) {
             StackTraceElement[] stackTrace = worker.getStackTrace();
             String innermostType = null;
             String innermostJob = null;
@@ -184,14 +196,16 @@ public abstract class JobNode extends ObjectNode {
                     break;
                 }
             }
-            if (currentLine < 0 || !threadJobs.containsKey(worker))
+            if (currentLine < 0 || !THREAD_JOBS.containsKey(worker)) {
                 throw new TryLaterException();
+            }
 
-            LinkedList<JobInfo> jobs = new LinkedList<>(threadJobs.get(worker));
+            LinkedList<JobInfo> jobs = new LinkedList<>(THREAD_JOBS.get(worker));
             if (jobs.isEmpty() ||
                     !jobs.getLast().getJobName().equals(innermostJob) ||
-                    !jobs.getLast().getTypeName().equals(innermostType))
+                    !jobs.getLast().getTypeName().equals(innermostType)) {
                 throw new TryLaterException();
+            }
 
             JobInfo outerJob = jobs.pollFirst();
             double progress = 0;
@@ -201,8 +215,9 @@ public abstract class JobNode extends ObjectNode {
             double currentRun = 0;
             double totalRuns = 1;
             while (true) {
-                if (outerJob.getCycles().containsKey(currentLine))
+                if (outerJob.getCycles().containsKey(currentLine)) {
                     throw new TryLaterException();
+                }
 
                 for (CycleInfo cycleInfo : outerJob.getCurrentCycles()) {
                     progress += ratio * ((cycleInfo.getRunningPosition() - outerStart) / outerLength + currentRun) / totalRuns;
@@ -213,8 +228,9 @@ public abstract class JobNode extends ObjectNode {
                     totalRuns = cycleInfo.getTotalRuns();
                 }
 
-                if (jobs.isEmpty())
+                if (jobs.isEmpty()) {
                     break;
+                }
 
                 JobInfo innerJob = jobs.pollFirst();
                 progress += ratio * (((outerJob.getRunningLine(innerJob.getCallPosition()) - outerStart) / outerLength) + currentRun) / totalRuns;
@@ -234,13 +250,13 @@ public abstract class JobNode extends ObjectNode {
     }
 
     public List<String> getJobs() {
-        return classJobs.get(getClass());
+        return CLASS_JOBS.get(getClass());
     }
 
     private static void prepareJobs(Class<? extends JobNode> type) {
-        if (!classJobInfos.containsKey(type)) {
-            classJobInfos.put(type, new HashMap<String, JobInfo>());
-            Map<String, JobInfo> jobs = classJobInfos.get(type);
+        if (!CLASS_JOB_INFOS.containsKey(type)) {
+            CLASS_JOB_INFOS.put(type, new HashMap<String, JobInfo>());
+            Map<String, JobInfo> jobs = CLASS_JOB_INFOS.get(type);
             Method[] methods = type.getMethods();
             ClassPool pool = ClassPool.getDefault();
             pool.appendClassPath(new ClassClassPath(type));
@@ -257,7 +273,7 @@ public abstract class JobNode extends ObjectNode {
             }
             List<String> list = new ArrayList<>(jobs.keySet());
             Collections.sort(list);
-            classJobs.put(type, Collections.unmodifiableList(list));
+            CLASS_JOBS.put(type, Collections.unmodifiableList(list));
         }
     }
 
@@ -268,10 +284,10 @@ public abstract class JobNode extends ObjectNode {
     private static Map<String, JobInfo> getJobInfos(String typeName) {
         try {
             Class<?> type = PluginManager.getClassLoader().loadClass(typeName);
-            if (!classJobInfos.containsKey(type)) {
+            if (!CLASS_JOB_INFOS.containsKey(type)) {
                 return Collections.emptyMap();
             }
-            return classJobInfos.get(type);
+            return CLASS_JOB_INFOS.get(type);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             System.exit(1);

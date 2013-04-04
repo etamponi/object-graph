@@ -21,7 +21,7 @@ package com.objectgraph.core;
 
 import java.util.*;
 
-class ParentRegistry {
+final class ParentRegistry {
 
     private ParentRegistry() {
     }
@@ -39,36 +39,45 @@ class ParentRegistry {
     }
 
     static boolean registered(EventRecipient parent, String property, Node child) {
-        if (!registry.containsKey(child))
+        if (!registry.containsKey(child)) {
             return false;
-        if (!registry.get(child).containsKey(parent))
+        }
+        if (!registry.get(child).containsKey(parent)) {
             return false;
+        }
         return registry.get(child).get(parent).contains(property);
     }
 
     static void register(EventRecipient parent, String property, Node child) {
-        if (!registry.containsKey(child))
+        if (!registry.containsKey(child)) {
             registry.put(child, new WeakHashMap<EventRecipient, Set<String>>());
-        if (!registry.get(child).containsKey(parent))
+        }
+        if (!registry.get(child).containsKey(parent)) {
             registry.get(child).put(parent, new HashSet<String>());
+        }
         registry.get(child).get(parent).add(property);
     }
 
     static void unregister(EventRecipient parent, String property, Node child) {
-        if (!registry.containsKey(child))
+        if (!registry.containsKey(child)) {
             return;
-        if (!registry.get(child).containsKey(parent))
+        }
+        if (!registry.get(child).containsKey(parent)) {
             return;
+        }
         registry.get(child).get(parent).remove(property);
-        if (registry.get(child).get(parent).isEmpty()) // this child has no more that parent
+        if (registry.get(child).get(parent).isEmpty()) {
             registry.get(child).remove(parent);
-        if (registry.get(child).isEmpty()) // this child has no parents at all!
+        }
+        if (registry.get(child).isEmpty()) {
             registry.remove(child);
+        }
     }
 
     static Map<EventRecipient, Set<String>> getParentPaths(Node child) {
-        if (!registry.containsKey(child))
+        if (!registry.containsKey(child)) {
             return Collections.emptyMap();
+        }
         return Collections.unmodifiableMap(registry.get(child));
     }
 

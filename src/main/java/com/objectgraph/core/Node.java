@@ -21,16 +21,12 @@ package com.objectgraph.core;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.objectgraph.core.eventtypes.changes.SetProperty;
-import com.objectgraph.core.exceptions.MalformedPathException;
-import com.objectgraph.core.exceptions.NodeHelperUsedByOtherException;
-import com.objectgraph.core.exceptions.PropertyNotExistsException;
 import com.objectgraph.pluginsystem.PluginManager;
 import com.objectgraph.utils.PathUtils;
 import org.objenesis.instantiator.ObjectInstantiator;
 import org.objenesis.strategy.InstantiatorStrategy;
 import org.objenesis.strategy.StdInstantiatorStrategy;
 import org.pcollections.HashTreePSet;
-import org.pcollections.MapPSet;
 import org.pcollections.PSet;
 
 import java.util.*;
@@ -210,8 +206,9 @@ public abstract class Node implements EventRecipient {
      * @param value the new value of the property
      */
     public void set(String path, Object value) {
-        if (path.isEmpty())
+        if (path.isEmpty()) {
             throw new MalformedPathException(this, path, "Empty path cannot be set.");
+        }
 
         int firstSplit = path.indexOf('.');
         if (firstSplit < 0) {
@@ -287,8 +284,9 @@ public abstract class Node implements EventRecipient {
 
         int firstSplit = path.indexOf('.');
         if (firstSplit < 0) {
-            if (!hasProperty(path))
+            if (!hasProperty(path)) {
                 throw new PropertyNotExistsException(this, path);
+            }
 
             return getLocal(path);
         } else {
@@ -513,8 +511,9 @@ public abstract class Node implements EventRecipient {
      * @param e the ErrorCheck to be removed
      */
     public void removeErrorCheck(ErrorCheck<?, ?> e) {
-        if (e.getNode() != this)
+        if (e.getNode() != this) {
             throw new NodeHelperUsedByOtherException(e, e.getNode(), this);
+        }
 
         errorChecks.get(e.getPath()).remove(e);
         if (errorChecks.get(e.getPath()).isEmpty()) {
@@ -553,7 +552,7 @@ public abstract class Node implements EventRecipient {
         }
         for (String property : getProperties()) {
             Object content = get(property);
-            if (content != null && content instanceof Node) {
+            if (content instanceof Node) {
                 ((Node) content).getErrors(errors, PathUtils.appendPath(path, property), seen);
             }
         }
@@ -659,8 +658,9 @@ public abstract class Node implements EventRecipient {
         for (EventRecipient p : getParentPaths().keySet()) {
             if (p instanceof Node && !seen.contains(p)) {
                 Node parent = (Node)p;
-                for (String parentPath : getParentPaths().get(parent))
+                for (String parentPath : getParentPaths().get(parent)) {
                     parent.getErrorChecks(PathUtils.appendPath(parentPath, path), list, seen.plus(parent));
+                }
             }
         }
     }

@@ -65,11 +65,13 @@ public class ImplementationChooserPropertyEditor extends PropertyEditor {
             if (item == NULLCONTENT || item == null || empty) {
                 setText("<null>");
                 item = null;
-            } else
+            } else {
                 setText(item.getClass().getSimpleName());
+            }
 
-            if (getModel().getValue() == item)
+            if (getModel().getValue() == item) {
                 setText(getText() + " (current)");
+            }
         }
     }
 
@@ -142,10 +144,11 @@ public class ImplementationChooserPropertyEditor extends PropertyEditor {
     public void updateModel() {
         if (getModel() != null) {
             Object newValue = implementationBox.getValue();
-            if (newValue == NULLCONTENT)
+            if (newValue == NULLCONTENT) {
                 getModel().setValue(null);
-            else
+            } else {
                 getModel().setValue(newValue);
+            }
         }
     }
 
@@ -155,8 +158,9 @@ public class ImplementationChooserPropertyEditor extends PropertyEditor {
             implementations = getModel().getPossibleValues();
             implementationBox.getItems().clear();
             Object current = getModel().getValue();
-            if (current != null)
+            if (current != null) {
                 implementationBox.getItems().add(getModel().getValue());
+            }
             implementationBox.getItems().add(NULLCONTENT);
             implementationBox.getItems().addAll(implementations);
             implementationBox.getSelectionModel().selectFirst();
@@ -167,21 +171,25 @@ public class ImplementationChooserPropertyEditor extends PropertyEditor {
     public boolean requiresViewUpdate(Event event) {
         if (event.getType() instanceof SetProperty) {
             if (event.getPath().equals(getModel().getPath())) {
-                if (implementationBox.getSelectionModel().getSelectedIndex() != 0)
+                if (implementationBox.getSelectionModel().getSelectedIndex() != 0) {
                     return true;
+                }
                 Object currentInView = implementationBox.getValue();
                 currentInView = currentInView == NULLCONTENT ? null : currentInView;
                 Object currentInModel = getModel().getValue();
-                if (currentInView != currentInModel)
+                if (currentInView != currentInModel) {
                     return true;
+                }
             }
         }
         List<?> possibleValues = getModel().getPossibleValues();
-        if (possibleValues.size() != implementations.size())
+        if (possibleValues.size() != implementations.size()) {
             return true;
+        }
         for (int i = 0; i < possibleValues.size(); i++) {
-            if (!possibleValues.get(i).getClass().equals(implementations.get(i).getClass()))
+            if (!possibleValues.get(i).getClass().equals(implementations.get(i).getClass())) {
                 return true;
+            }
         }
         return false;
     }

@@ -27,11 +27,15 @@ import com.objectgraph.pluginsystem.PluginManager;
 
 import java.util.*;
 
-public class EditorManager {
+public final class EditorManager {
 
     private static final List<PropertyEditor> editors = PluginManager.getImplementations(PropertyEditor.class, Collections.<Constraint<?, ?>>emptyList());
     private static final Map<Class<?>, Class<PropertyEditor>> cachedEditors = new HashMap<>();
     private static final Map<Class<?>, Map<Class<?>, Double>> distances = new HashMap<>();
+
+    private EditorManager() {
+        // Utility class, no instances
+    }
 
     public static PropertyEditor getBestEditor(RootedProperty model, boolean runtime) {
         return getBestEditor(model, runtime, false);
@@ -42,8 +46,9 @@ public class EditorManager {
 
         if (cachedEditors.containsKey(valueType)) {
             PropertyEditor cached = instantiateEditor(cachedEditors.get(valueType));
-            if (cached.canEdit(model))
+            if (cached.canEdit(model)) {
                 return cached;
+            }
         }
 
         List<PropertyEditor> editors = getEditors();
@@ -51,15 +56,17 @@ public class EditorManager {
         PropertyEditor best = null;
         while (it.hasNext()) {
             PropertyEditor e = it.next();
-            if (e.canEdit(model))
+            if (e.canEdit(model)) {
                 best = updateBestEditor(valueType, best, e);
+            }
         }
 
         if (best != null) {
             cachedEditors.put(valueType, (Class<PropertyEditor>) best.getClass());
             best = instantiateEditor((Class<PropertyEditor>) best.getClass());
-            if (attach)
+            if (attach) {
                 best.attach(model);
+            }
         }
 
         return best;
@@ -82,18 +89,20 @@ public class EditorManager {
     private static PropertyEditor updateBestEditor(Class<?> valueType, PropertyEditor current, PropertyEditor candidate) {
         double candidateDistance = distance(valueType, candidate.getBaseEditableTypes());
         double currentDistance = current == null ? Double.POSITIVE_INFINITY : distance(valueType, current.getBaseEditableTypes());
-        if (currentDistance > candidateDistance)
+        if (currentDistance > candidateDistance) {
             return candidate;
-        else
+        } else {
             return current;
+        }
     }
 
     private static double distance(Class<?> dst, Set<Class<?>> srcSet) {
         double distance = Double.POSITIVE_INFINITY;
         for (Class<?> src : srcSet) {
             double current = distance(dst, src);
-            if (current < distance)
+            if (current < distance) {
                 distance = current;
+            }
         }
         return distance;
     }
@@ -104,14 +113,15 @@ public class EditorManager {
             distances.get(src).put(src, 0.0);
             distances.get(src).put(null, Double.POSITIVE_INFINITY);
         }
-        if (distances.get(src).containsKey(dst))
+        if (distances.get(src).containsKey(dst)) {
             return distances.get(src).get(dst);
-        else {
+        } else {
             double distance = 1 + distance(dst.getSuperclass(), src);
             for (Class<?> i : dst.getInterfaces()) {
                 double current = 1.02 + distance(i, src);
-                if (current < distance)
+                if (current < distance) {
                     distance = current;
+                }
             }
             distances.get(src).put(dst, distance);
             return distance;
@@ -121,8 +131,9 @@ public class EditorManager {
     public static void detachAllEditors(Node node) {
         Map<EventRecipient, Set<String>> parents = new HashMap<>(node.getParentPaths());
         for (EventRecipient m: parents.keySet()) {
-            if (m instanceof PropertyEditor)
+            if (m instanceof PropertyEditor) {
                 ((PropertyEditor) m).detach();
+            }
         }
     }
 }

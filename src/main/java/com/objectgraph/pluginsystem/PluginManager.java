@@ -34,7 +34,7 @@ import java.net.URLClassLoader;
 import java.util.*;
 
 
-public class PluginManager {
+public final class PluginManager {
 
     private static PluginConfiguration configuration = null;
     private static ClassLoader classLoader = FXMLLoader.getDefaultClassLoader();

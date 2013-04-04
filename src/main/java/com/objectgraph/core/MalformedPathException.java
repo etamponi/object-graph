@@ -17,7 +17,7 @@
  * along with object-graph.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.objectgraph.core.exceptions;
+package com.objectgraph.core;
 
 import com.objectgraph.core.Node;
 

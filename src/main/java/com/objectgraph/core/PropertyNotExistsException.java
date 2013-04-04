@@ -17,9 +17,7 @@
  * along with object-graph.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.objectgraph.core.exceptions;
-
-import com.objectgraph.core.Node;
+package com.objectgraph.core;
 
 public class PropertyNotExistsException extends MalformedPathException {
 

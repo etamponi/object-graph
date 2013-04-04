@@ -21,7 +21,7 @@ package com.objectgraph.utils;
 
 import java.lang.reflect.Modifier;
 
-public class ClassUtils {
+public final class ClassUtils {
 
     private ClassUtils() {
     }
