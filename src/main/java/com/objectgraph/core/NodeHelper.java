@@ -19,7 +19,7 @@
 
 package com.objectgraph.core;
 
-import com.objectgraph.core.exceptions.NodeHelperAlreadyUsedException;
+import com.objectgraph.core.exceptions.NodeHelperUsedByOtherException;
 
 import java.lang.ref.WeakReference;
 
@@ -32,7 +32,7 @@ public abstract class NodeHelper<N extends Node> {
             this.node = null;
 
         if (this.node != null && this.node.get() != node)
-            throw new NodeHelperAlreadyUsedException(this, this.node.get());
+            throw new NodeHelperUsedByOtherException(this, getNode(), node);
         this.node = new WeakReference<>(node);
     }
 

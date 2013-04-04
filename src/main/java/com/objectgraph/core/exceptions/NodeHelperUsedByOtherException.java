@@ -22,8 +22,26 @@ package com.objectgraph.core.exceptions;
 import com.objectgraph.core.Node;
 import com.objectgraph.core.NodeHelper;
 
-public class NodeHelperAlreadyUsedException extends RuntimeException {
-    public NodeHelperAlreadyUsedException(NodeHelper helper, Node node) {
-        super("NodeHelper " + helper + " is used by " + node);
+public class NodeHelperUsedByOtherException extends RuntimeException {
+
+    private final NodeHelper helper;
+    private final Node queryNode, helpedNode;
+
+    public NodeHelperUsedByOtherException(NodeHelper helper, Node helpedNode, Node queryNode) {
+        this.helper = helper;
+        this.queryNode = queryNode;
+        this.helpedNode = helpedNode;
+    }
+
+    public NodeHelper getNodeHelper() {
+        return helper;
+    }
+
+    public Node getQueryNode() {
+        return queryNode;
+    }
+
+    public Node getHelpedNode() {
+        return helpedNode;
     }
 }

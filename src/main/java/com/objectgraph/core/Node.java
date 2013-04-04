@@ -22,6 +22,7 @@ package com.objectgraph.core;
 import com.esotericsoftware.kryo.Kryo;
 import com.objectgraph.core.eventtypes.changes.SetProperty;
 import com.objectgraph.core.exceptions.MalformedPathException;
+import com.objectgraph.core.exceptions.NodeHelperUsedByOtherException;
 import com.objectgraph.core.exceptions.PropertyNotExistsException;
 import com.objectgraph.pluginsystem.PluginManager;
 import com.objectgraph.utils.PathUtils;
@@ -95,10 +96,12 @@ public abstract class Node implements EventRecipient {
         kryo = new Kryo() {
             InstantiatorStrategy s = new StdInstantiatorStrategy();
             @Override protected ObjectInstantiator newInstantiator(final Class type) {
-                if (Node.class.isAssignableFrom(type))
+                if (Node.class.isAssignableFrom(type)) {
                     return s.newInstantiatorOf(type);
-                else
+                }
+                else {
                     return super.newInstantiator(type);
+                }
             }
         };
         kryo.addDefaultSerializer(Node.class, NodeSerializer.class);
@@ -208,12 +211,13 @@ public abstract class Node implements EventRecipient {
      */
     public void set(String path, Object value) {
         if (path.isEmpty())
-            throw new MalformedPathException(new RootedProperty(this, path), "Empty path cannot be set.");
+            throw new MalformedPathException(this, path, "Empty path cannot be set.");
 
         int firstSplit = path.indexOf('.');
         if (firstSplit < 0) {
-            if (!hasProperty(path))
-                throw new PropertyNotExistsException(new RootedProperty(this, path));
+            if (!hasProperty(path)) {
+                throw new PropertyNotExistsException(this, path);
+            }
 
             Object oldValue = getLocal(path);
             if (oldValue != value) {
@@ -233,8 +237,9 @@ public abstract class Node implements EventRecipient {
             String localProperty = path.substring(0, firstSplit);
             String remainingPath = path.substring(firstSplit + 1);
             Node local = getLocal(localProperty);
-            if (local != null)
+            if (local != null) {
                 local.set(remainingPath, value);
+            }
         }
     }
 
@@ -276,23 +281,26 @@ public abstract class Node implements EventRecipient {
      */
     @SuppressWarnings("unchecked")
     public <T> T get(String path) {
-        if (path.isEmpty())
+        if (path.isEmpty()) {
             return (T) this;
+        }
 
         int firstSplit = path.indexOf('.');
         if (firstSplit < 0) {
             if (!hasProperty(path))
-                throw new PropertyNotExistsException(new RootedProperty(this, path));
+                throw new PropertyNotExistsException(this, path);
 
             return getLocal(path);
         } else {
             String localProperty = path.substring(0, firstSplit);
             String remainingPath = path.substring(firstSplit + 1);
             Node local = getLocal(localProperty);
-            if (local != null)
+            if (local != null) {
                 return local.get(remainingPath);
-            else
+            }
+            else {
                 return null;
+            }
         }
     }
 
@@ -357,16 +365,18 @@ public abstract class Node implements EventRecipient {
     private void getControlledProperties(String prefixPath, List<String> controlled, PSet<Node> seen) {
         for (Trigger<?> t : triggers) {
             for (String path : t.getControlledPaths()) {
-                if (PathUtils.isParent(prefixPath, path))
+                if (PathUtils.isParent(prefixPath, path)) {
                     controlled.add(PathUtils.toLocalProperty(path));
+                }
             }
         }
 
         for (EventRecipient p : getParentPaths().keySet()) {
             if (p instanceof Node && !seen.contains(p)) {
                 Node parent = (Node)p;
-                for (String path : getParentPaths().get(parent))
+                for (String path : getParentPaths().get(parent)) {
                     parent.getControlledProperties(PathUtils.appendPath(path, prefixPath), controlled, seen.plus(parent));
+                }
             }
 
         }
@@ -414,14 +424,17 @@ public abstract class Node implements EventRecipient {
      */
     @Override
     public void handleEvent(Event e, PSet<EventRecipient> visited) {
-        for (Trigger<?> t : triggers)
+        for (Trigger<?> t : triggers) {
             t.check(e);
+        }
 
         for (EventRecipient parent : getParentPaths().keySet()) {
-            if (visited.contains(parent))
+            if (visited.contains(parent)) {
                 continue;
-            for (String path : getParentPaths().get(parent))
+            }
+            for (String path : getParentPaths().get(parent)) {
                 parent.handleEvent(e.backPropagate(path), visited.plus(parent));
+            }
         }
     }
 
@@ -446,8 +459,11 @@ public abstract class Node implements EventRecipient {
      */
     @SuppressWarnings("unchecked")
     public <N extends Node> void removeTrigger(Trigger<N> t) {
-        if (triggers.remove(t))
-            t.setNode(null);
+        if (t.getNode() != this) {
+            throw new NodeHelperUsedByOtherException(t, t.getNode(), this);
+        }
+        triggers.remove(t);
+        t.setNode(null);
     }
 
     /**
@@ -458,8 +474,9 @@ public abstract class Node implements EventRecipient {
      * @return the type of the property, or {@code null} if runtime is {@code true} and the property value is null
      */
     public Class<?> getPropertyType(String property, boolean runtime) {
-        if (!hasProperty(property))
-            throw new PropertyNotExistsException(new RootedProperty(this, property));
+        if (!hasProperty(property)) {
+            throw new PropertyNotExistsException(this, property);
+        }
         if (runtime) {
             Object content = getLocal(property);
             return content == null ? null : content.getClass();
@@ -477,15 +494,16 @@ public abstract class Node implements EventRecipient {
     protected abstract Class<?> getDeclaredPropertyType(String property);
 
     /**
-     * Register an {@link ErrorCheck} that will be used by {@link #getErrors()}
+     * Register an {@link ErrorCheck}
      *
      * @param e the ErrorCheck to be registered
      */
     @SuppressWarnings("unchecked")
     public <N extends Node> void addErrorCheck(ErrorCheck<N, ?> e) {
         e.setNode((N) this);
-        if (!errorChecks.containsKey(e.getPath()))
+        if (!errorChecks.containsKey(e.getPath())) {
             errorChecks.put(e.getPath(), new HashSet<ErrorCheck<?, ?>>());
+        }
         errorChecks.get(e.getPath()).add(e);
     }
 
@@ -496,10 +514,12 @@ public abstract class Node implements EventRecipient {
      */
     public void removeErrorCheck(ErrorCheck<?, ?> e) {
         if (e.getNode() != this)
-            return; // TODO throw exception
+            throw new NodeHelperUsedByOtherException(e, e.getNode(), this);
+
         errorChecks.get(e.getPath()).remove(e);
-        if (errorChecks.get(e.getPath()).isEmpty())
+        if (errorChecks.get(e.getPath()).isEmpty()) {
             errorChecks.remove(e.getPath());
+        }
         e.setNode(null);
     }
 
@@ -515,24 +535,27 @@ public abstract class Node implements EventRecipient {
     }
 
     private void getErrors(Map<String, Set<Error>> errors, String path, Set<Node> seen) {
-        if (seen.contains(this))
+        if (seen.contains(this)) {
             return;
+        }
         seen.add(this);
         for (Set<ErrorCheck<?, ?>> checks : errorChecks.values()) {
             for (ErrorCheck<?, ?> check: checks) {
                 Error error = check.getError();
                 if (error != null) {
                     String completePath = PathUtils.appendPath(path, check.getPath());
-                    if (!errors.containsKey(completePath))
+                    if (!errors.containsKey(completePath)) {
                         errors.put(completePath, new HashSet<Error>());
+                    }
                     errors.get(completePath).add(error);
                 }
             }
         }
         for (String property : getProperties()) {
             Object content = get(property);
-            if (content != null && content instanceof Node)
+            if (content != null && content instanceof Node) {
                 ((Node) content).getErrors(errors, PathUtils.appendPath(path, property), seen);
+            }
         }
     }
 
@@ -549,8 +572,9 @@ public abstract class Node implements EventRecipient {
     public <N extends Node> void addConstraint(Constraint<N, ?> constraint) {
         // TODO move the Constraint system to the PluginManager
         constraint.setNode((N) this);
-        if (!constraints.containsKey(constraint.getPath()))
+        if (!constraints.containsKey(constraint.getPath())) {
             constraints.put(constraint.getPath(), new HashSet<Constraint<?, ?>>());
+        }
 
         constraints.get(constraint.getPath()).add(constraint);
         addErrorCheck(constraint);
@@ -562,11 +586,11 @@ public abstract class Node implements EventRecipient {
      * @param constraint the constraint to be removed
      */
     public void removeConstraint(Constraint<?, ?> constraint) {
-        String path = constraint.getPath();
-        if (constraints.containsKey(path) && constraints.get(path).remove(constraint)) {
-            if (constraints.get(path).isEmpty())
-                constraints.remove(path);
-            removeErrorCheck(constraint);
+        removeErrorCheck(constraint);
+
+        constraints.get(constraint.getPath()).remove(constraint);
+        if (constraints.get(constraint.getPath()).isEmpty()) {
+            constraints.remove(constraint.getPath());
         }
     }
 
@@ -578,8 +602,9 @@ public abstract class Node implements EventRecipient {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public List<?> getPossiblePropertyValues(String property) {
-        if (!hasProperty(property))
-            throw new PropertyNotExistsException(new RootedProperty(this, property));
+        if (!hasProperty(property)) {
+            throw new PropertyNotExistsException(this, property);
+        }
 
         List<Constraint<?, ?>> list = new ArrayList<>();
         getConstraints(property, list, HashTreePSet.<Node>empty());
@@ -589,22 +614,34 @@ public abstract class Node implements EventRecipient {
 
     private void getConstraints(String path, List<Constraint<?, ?>> list, PSet<Node> seen) {
         for(String constrainedPath: constraints.keySet()) {
-            if (PathUtils.samePath(constrainedPath, path))
+            if (PathUtils.samePath(constrainedPath, path)) {
                 list.addAll(constraints.get(constrainedPath));
+            }
         }
 
         for (EventRecipient p : getParentPaths().keySet()) {
             if (p instanceof Node && !seen.contains(p)) {
                 Node parent = (Node)p;
-                for (String parentPath : getParentPaths().get(parent))
+                for (String parentPath : getParentPaths().get(parent)) {
                     parent.getConstraints(PathUtils.appendPath(parentPath, path), list, seen.plus(parent));
+                }
             }
         }
     }
 
+    /**
+     * Recursively find all the {@link ErrorCheck}s relative to the given property.
+     *
+     * This method goes through the graph of the parents and looks for {@link ErrorCheck} whose
+     * {@link com.objectgraph.core.ErrorCheck#getPath()} is compatible with the given property.
+     *
+     * @param property the name of the property
+     * @return a List of {@link ErrorCheck}s
+     */
     public List<ErrorCheck<?, ?>> getErrorChecks(String property) {
-        if (!hasProperty(property))
-            throw new PropertyNotExistsException(new RootedProperty(this, property));
+        if (!hasProperty(property)) {
+            throw new PropertyNotExistsException(this, property);
+        }
 
         List<ErrorCheck<?, ?>> list = new ArrayList<>();
         getErrorChecks(property, list, HashTreePSet.<Node>empty());
@@ -614,8 +651,9 @@ public abstract class Node implements EventRecipient {
 
     private void getErrorChecks(String path, List<ErrorCheck<?, ?>> list, PSet<Node> seen) {
         for(String constrainedPath: errorChecks.keySet()) {
-            if (PathUtils.samePath(constrainedPath, path))
+            if (PathUtils.samePath(constrainedPath, path)) {
                 list.addAll(errorChecks.get(constrainedPath));
+            }
         }
 
         for (EventRecipient p : getParentPaths().keySet()) {
@@ -628,16 +666,17 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
-     * Return a {@link RootedProperty} relative to the given property
+     * Return a {@link RootedProperty} relative to the given property.
      *
      * @param property the name of the property
      * @return a {@link RootedProperty} object
      */
     public RootedProperty getRootedProperty(String property) {
-        RootedProperty ret = new RootedProperty(this, property);
-        if (!hasProperty(property))
-            throw new PropertyNotExistsException(ret);
-        return ret;
+        if (!hasProperty(property)) {
+            throw new PropertyNotExistsException(this, property);
+        }
+
+        return new RootedProperty(this, property);
     }
 
 }

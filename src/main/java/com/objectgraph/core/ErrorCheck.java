@@ -45,12 +45,14 @@ package com.objectgraph.core;
  *     }
  * </pre>
  * This way, you can still set {@code percent} with any integer, but if you invoke {@link com.objectgraph.core.Node#getErrors()},
- * you obtain a map that contains, for every property of the Node, a set of configuration errors. You could display it in
+ * or {@link com.objectgraph.core.RootedProperty#getErrors()} with a {@link RootedProperty} object connected with the "percent"
+ * property, you obtain a set (or a map) of configuration errors. You could display it in
  * some way, by either showing it on an list view or by changing the color of the editor, or in any way you want.
  * <p/>
  * As any other {@link NodeHelper}, you can access the Node that registered the ErrorCheck through {@link #getNode()}.
  *
  * @param <N> The subtype of {@link Node} to which you want this ErrorCheck to be registered
+ * @param <T> the type of value that we should check
  */
 public abstract class ErrorCheck<N extends Node, T> extends NodeHelper<N> {
 
@@ -60,6 +62,11 @@ public abstract class ErrorCheck<N extends Node, T> extends NodeHelper<N> {
         this.path = path;
     }
 
+    /**
+     * Obtain the path to the checked property
+     *
+     * @return a String object with the path of the checked property
+     */
     public String getPath() {
         return path;
     }
@@ -74,9 +81,12 @@ public abstract class ErrorCheck<N extends Node, T> extends NodeHelper<N> {
     }
 
     /**
+     * Given a value, returns a configuration error if it is the case.
      *
-     * @param value
-     * @return
+     * With this method you can use this ErrorCheck to obtain an error for a value not assigned to the relative property.
+     *
+     * @param value the value to check
+     * @return an {@link Error} instance, or {@code null} if the error doesn't apply.
      */
     public abstract Error getError(T value);
 

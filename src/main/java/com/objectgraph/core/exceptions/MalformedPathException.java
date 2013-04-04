@@ -19,20 +19,26 @@
 
 package com.objectgraph.core.exceptions;
 
-import com.objectgraph.core.RootedProperty;
+import com.objectgraph.core.Node;
 
 public class MalformedPathException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    private final RootedProperty path;
+    private final Node root;
+    private final String path;
 
-    public MalformedPathException(RootedProperty path, String message) {
+    public MalformedPathException(Node root, String path, String message) {
         super(message);
+        this.root = root;
         this.path = path;
     }
 
-    public RootedProperty getPath() {
+    public Node getRoot() {
+        return root;
+    }
+
+    public String getPath() {
         return path;
     }
 
