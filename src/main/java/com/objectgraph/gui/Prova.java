@@ -38,8 +38,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import java.lang.ref.WeakReference;
-
 public class Prova {
     private static ProvaNode node = new ProvaNode();
 
@@ -51,6 +49,7 @@ public class Prova {
         @Property short sh;
         @Property boolean b;
         @Property Node node;
+        @Property ListNode<String> strings = new ListNode<>(String.class);
 
         public ProvaNode() {
             addConstraint(new Constraint<ProvaNode, Node>("node") {
@@ -74,6 +73,7 @@ public class Prova {
                         return new Error(Error.ErrorLevel.WARNING, "value should be 12");
                 }
             });
+            initialiseNode();
         }
     }
 
@@ -115,7 +115,8 @@ public class Prova {
                     EditorManager.getBestEditor(node.getRootedProperty("d"), false, true),
                     EditorManager.getBestEditor(node.getRootedProperty("f"), false, true),
                     EditorManager.getBestEditor(node.getRootedProperty("sh"), false, true),
-                    EditorManager.getBestEditor(node.getRootedProperty("b"), false, true)
+                    EditorManager.getBestEditor(node.getRootedProperty("b"), false, true),
+                    EditorManager.getBestEditor(node.getRootedProperty("strings"), false, true)
             };
             PropertyEditor editor3 = new ImplementationChooserPropertyEditor().attach(node.getRootedProperty("node"));
 
@@ -143,6 +144,7 @@ public class Prova {
 
             stage.setScene(scene);
             stage.showAndWait();
+            System.out.println(node.strings);
         }
     }
 
@@ -154,25 +156,6 @@ public class Prova {
         PluginManager.initialise(new PluginConfiguration("com.objectgraph"));
 
         Application.launch(MyApp.class);
-        WeakReference<Scene> scene = new WeakReference<Scene>(MyApp.scene);
-        MyApp.scene = null;
-        System.out.println(node.getErrors());
-        System.out.println(node.b);
-        int i = 1;
-        ProvaNode n = new ProvaNode();
-        provaParent(n);
-        while (!n.getControlledProperties().isEmpty() || !node.getParentPaths().isEmpty()) {
-            System.out.println((i++) + " " + node.getParentPaths());
-            if (i > 1000)
-                System.gc();
-            if (i > 1100)
-                EditorManager.detachAllEditors(node);
-
-            System.out.println(scene.get());
-        }
-        System.out.println(node.getParentPaths());
-
-        System.out.println("Finished!");
     }
 
 }

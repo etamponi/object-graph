@@ -47,7 +47,7 @@ public final class EditorManager {
         if (cachedEditors.containsKey(valueType)) {
             PropertyEditor cached = instantiateEditor(cachedEditors.get(valueType));
             if (cached.canEdit(model)) {
-                return cached;
+                return attach ? cached.attach(model) : cached;
             }
         }
 

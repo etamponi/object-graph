@@ -378,4 +378,7 @@ public class ListNode<E> extends Node implements List<E> {
         return list.toString();
     }
 
+    public Class<E> getElementType() {
+        return elementType;
+    }
 }
