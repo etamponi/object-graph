@@ -82,8 +82,6 @@ public abstract class PropertyEditor extends AnchorPane implements Initializable
         }
     }
 
-    public abstract void updateModel();
-
     public abstract boolean requiresViewUpdate(Event event);
 
     public abstract void updateView();

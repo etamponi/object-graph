@@ -51,7 +51,6 @@ public class BooleanPropertyEditor extends PropertyEditor {
         });
     }
 
-    @Override
     public void updateModel() {
         if (getModel() != null) {
             getModel().setValue(checkBox.isSelected());

@@ -23,7 +23,6 @@ import com.google.common.collect.Sets;
 import com.objectgraph.core.Event;
 import com.objectgraph.core.ListNode;
 import com.objectgraph.core.RootedProperty;
-import com.objectgraph.core.eventtypes.changes.Change;
 import com.objectgraph.core.eventtypes.changes.ListChange;
 import com.objectgraph.gui.EditorManager;
 import com.objectgraph.gui.PropertyEditor;
@@ -40,12 +39,12 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-public class ListPropertyEditor extends PropertyEditor {
+public class ListNodePropertyEditor extends PropertyEditor {
 
     @FXML
     private ListView listView;
 
-    public ListPropertyEditor() {
+    public ListNodePropertyEditor() {
         super("ListEditorView.fxml");
     }
 
@@ -143,15 +142,9 @@ public class ListPropertyEditor extends PropertyEditor {
     }
 
     @Override
-    public void updateModel() {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
     public boolean requiresViewUpdate(Event event) {
         if (event.getType() instanceof ListChange) {
-            // TODO return true only if the number of elements has changed or the name of the elements has changed
-            return PathUtils.isPrefix(getModel().getPath(), event.getPath());
+            return PathUtils.samePath(getModel().getPath(), event.getPath());
         } else {
             return false;
         }
@@ -173,6 +166,6 @@ public class ListPropertyEditor extends PropertyEditor {
 
     @Override
     public Set<Class<?>> getBaseEditableTypes() {
-        return Sets.<Class<?>>newHashSet(List.class, ListNode.class);
+        return Sets.<Class<?>>newHashSet(ListNode.class);
     }
 }

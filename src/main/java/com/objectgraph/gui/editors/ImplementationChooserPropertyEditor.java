@@ -140,7 +140,6 @@ public class ImplementationChooserPropertyEditor extends PropertyEditor {
         }
     }
 
-    @Override
     public void updateModel() {
         if (getModel() != null) {
             Object newValue = implementationBox.getValue();

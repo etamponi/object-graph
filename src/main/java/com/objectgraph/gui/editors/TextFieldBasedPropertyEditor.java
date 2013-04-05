@@ -87,7 +87,6 @@ public abstract class TextFieldBasedPropertyEditor<T> extends PropertyEditor {
         }
     }
 
-    @Override
     public void updateModel() {
         if (getModel() != null && isValid(textField.getText())) {
             getModel().setValue(fromTextToModel(textField.getText()));
