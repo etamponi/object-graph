@@ -136,7 +136,7 @@ public abstract class Node implements EventRecipient {
      */
     protected void initialiseNode() {
         for (String property : getProperties()) {
-            if (get(property) instanceof Node && !get(property, Node.class).getParentPaths().containsKey(this)) {
+            if (get(property) instanceof Node) { // && !get(property, Node.class).getParentPaths().containsKey(this)) {
                 Object value = get(property);
                 setLocal(property, null);
                 set(property, value);

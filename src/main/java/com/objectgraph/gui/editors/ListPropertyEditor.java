@@ -24,9 +24,11 @@ import com.objectgraph.core.Event;
 import com.objectgraph.core.ListNode;
 import com.objectgraph.core.RootedProperty;
 import com.objectgraph.core.eventtypes.changes.Change;
+import com.objectgraph.core.eventtypes.changes.ListChange;
 import com.objectgraph.gui.EditorManager;
 import com.objectgraph.gui.PropertyEditor;
 import com.objectgraph.utils.PathUtils;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -73,16 +75,11 @@ public class ListPropertyEditor extends PropertyEditor {
                     }
 
                     @Override
-                    public void commitEdit(Object value) {
-                        super.commitEdit(value);
-                        System.out.println("commitEdit " + value + " " + getIndex());
-                    }
-
-                    @Override
                     public void cancelEdit() {
                         super.cancelEdit();
                         if (getGraphic() != null) {
                             PropertyEditor editor = (PropertyEditor) getGraphic();
+                            getListView().getItems().set(getIndex(), editor.getModel().getValue());
                             setText(editor.getModel().getValue().toString());
                             editor.detach();
                             setGraphic(null);
@@ -127,7 +124,8 @@ public class ListPropertyEditor extends PropertyEditor {
     private void deleteElement() {
         if (getModel() != null) {
             ListNode list = getModel().getValue();
-            list.removeAll(listView.getSelectionModel().getSelectedItems());
+            ObservableList selectedItems = listView.getSelectionModel().getSelectedItems();
+            list.removeAll(selectedItems);
         }
     }
 
@@ -151,7 +149,7 @@ public class ListPropertyEditor extends PropertyEditor {
 
     @Override
     public boolean requiresViewUpdate(Event event) {
-        if (event.getType() instanceof Change) {
+        if (event.getType() instanceof ListChange) {
             // TODO return true only if the number of elements has changed or the name of the elements has changed
             return PathUtils.isPrefix(getModel().getPath(), event.getPath());
         } else {
