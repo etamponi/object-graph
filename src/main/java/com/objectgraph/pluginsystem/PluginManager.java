@@ -21,8 +21,6 @@ package com.objectgraph.pluginsystem;
 
 import com.objectgraph.core.Constraint;
 import com.objectgraph.core.Node;
-import com.objectgraph.pluginsystem.exceptions.PluginManagerAlreadyInitializedException;
-import com.objectgraph.pluginsystem.exceptions.PluginManagerNotInitializedException;
 import com.objectgraph.utils.ClassUtils;
 import javafx.fxml.FXMLLoader;
 import org.reflections.Reflections;

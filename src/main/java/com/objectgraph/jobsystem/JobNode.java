@@ -20,8 +20,6 @@
 package com.objectgraph.jobsystem;
 
 import com.objectgraph.core.ObjectNode;
-import com.objectgraph.jobsystem.exceptions.JobInterruptedException;
-import com.objectgraph.jobsystem.exceptions.TryLaterException;
 import com.objectgraph.pluginsystem.PluginManager;
 import javassist.ClassClassPath;
 import javassist.ClassPool;

@@ -17,7 +17,7 @@
  * along with object-graph.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.objectgraph.pluginsystem.exceptions;
+package com.objectgraph.gui;
 
-public class PluginManagerAlreadyInitializedException extends RuntimeException {
+public class EditorNotDetachedException extends RuntimeException {
 }

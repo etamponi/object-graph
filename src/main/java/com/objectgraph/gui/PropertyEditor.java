@@ -22,8 +22,6 @@ package com.objectgraph.gui;
 import com.objectgraph.core.Event;
 import com.objectgraph.core.EventRecipient;
 import com.objectgraph.core.RootedProperty;
-import com.objectgraph.gui.exceptions.EditorNotDetachedException;
-import com.objectgraph.gui.exceptions.InvalidModelForEditorException;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;

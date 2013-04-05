@@ -17,10 +17,14 @@
  * along with object-graph.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.objectgraph.jobsystem.exceptions;
+package com.objectgraph.jobsystem;
 
-public class JobInterruptedException extends RuntimeException {
+public class JobNotExistsException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
+
+    public JobNotExistsException(String message) {
+        super(message);
+    }
 
 }

@@ -17,7 +17,7 @@
  * along with object-graph.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.objectgraph.jobsystem.exceptions;
+package com.objectgraph.jobsystem;
 
 public class TryLaterException extends Exception {
 

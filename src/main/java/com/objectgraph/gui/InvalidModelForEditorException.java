@@ -17,7 +17,7 @@
  * along with object-graph.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.objectgraph.pluginsystem.exceptions;
+package com.objectgraph.gui;
 
-public class PluginManagerNotInitializedException extends RuntimeException {
+public class InvalidModelForEditorException extends RuntimeException {
 }

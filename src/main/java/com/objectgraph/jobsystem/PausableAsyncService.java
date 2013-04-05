@@ -19,7 +19,6 @@
 
 package com.objectgraph.jobsystem;
 
-import com.objectgraph.jobsystem.exceptions.JobNotExistsException;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
