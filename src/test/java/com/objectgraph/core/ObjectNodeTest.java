@@ -19,130 +19,118 @@
 
 package com.objectgraph.core;
 
-import com.objectgraph.core.Error.ErrorLevel;
-import com.objectgraph.pluginsystem.PluginConfiguration;
-import com.objectgraph.pluginsystem.PluginManager;
-import com.objectgraph.utils.StringList;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
+import com.google.common.collect.Sets;
 import org.junit.Test;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
-
 public class ObjectNodeTest {
-	
-	public static class NodeExampleBase extends ObjectNode {
-		@Property int property1;
-		@Property String property2;
-		@Property NodeExampleChild property3;
-		
-		protected NodeExampleChild falseProperty;
-		
-		public NodeExampleBase() {
-			addTrigger(new Trigger<NodeExampleBase>() {
 
-				@Override
-				public List<String> getControlledPaths() {
-					return new StringList("property1", "property3.property2");
-				}
+    private static class TestChild extends ObjectNode {
+        @Property String s;
+        @Property int i;
+    }
+    private static class TestBase extends ObjectNode {
+        @Property Node child = new TestChild();
+        @Property String name;
 
-				@Override
-				protected boolean isTriggeredBy(Event event) {
-					return event.getPath().equals("property2") 
-							&& getNode().get("property2").equals("enable");
-				}
+        public TestBase() {
+            initialiseNode();
+        }
+    }
 
-				@Override
-				protected void action(Event event) {
-					getNode().set("property1", 15);
-					getNode().set("property3.property2", 3.1415);
-					
-					getNode().set("property2", "enabled");
-				}
-				
-			});
-			
-			addErrorCheck(new ErrorCheck<NodeExampleBase, String>("property2") {
-				@Override
-				public Error getError(String value) {
-					if ("enabled".equals(value))
-						return null;
-					else
-						return new Error(ErrorLevel.WARNING, "property2: still not set to \"enabled\"");
-				}
+    @Test
+    public void testAccessors() throws Exception {
+        TestBase base = new TestBase();
+        base.set("name", "test object");
+        base.set("child.s", "test child");
+        base.set("child.i", 100);
 
-			});
-		}
-	}
-	
-	public static class NodeExampleChild extends ObjectNode {
-		@Property
-		protected String property1;
-		@Property
-		protected double property2;
-	}
-	
-	public static class NodeChildSubclass extends NodeExampleChild {
-		@Property
-		protected String property3;
-	}
+        assertEquals("test object", base.get("name"));
+        assertEquals("test child", base.get("child.s"));
+        assertEquals(100, base.get("child.i"));
+    }
 
-	@Test
-	public void test() {
-		NodeExampleBase base = new NodeExampleBase();
-		assertEquals(new StringList("property1", "property2", "property3"), base.getProperties());
-		assertEquals(new StringList("property2", "property3"), base.getFreeProperties());
-		assertEquals(new StringList("property1"), base.getControlledProperties());
-		
-		NodeExampleChild child = new NodeExampleChild();
-		assertTrue(child.getControlledProperties().isEmpty());
-		base.set("property3", child);
-		assertEquals(new StringList("property2"), child.getControlledProperties());
-		assertEquals(0.0, child.get("property2"));
-		
-		Map<String,Set<Error>> errors = base.getErrors();
-		assertEquals(1, errors.size());
-        assertEquals(1, errors.values().iterator().next().size());
-        Error error = errors.values().iterator().next().iterator().next();
-		assertEquals("property2: still not set to \"enabled\"", error.getMessage());
-		assertEquals("property2: still not set to \"enabled\" (warning)", error.toString());
-		
-		base.set("property2", "enable");
-		assertEquals(3.1415, child.get("property2"));
-		assertEquals(15, base.get("property1"));
-		assertEquals("enabled", base.get("property2"));
-		
-		errors = base.getErrors();
-		assertTrue(errors.isEmpty());
-		
-		assertSame(base.get("property3.property1"), child.get("property1"));
-		
-		base.set("property3", null);
-		assertTrue(child.getControlledProperties().isEmpty());
-		
-		child.set("property2", 0.0);
-		base.set("property2", "enable");
-		
-		assertEquals(0.0, child.get("property2"));
-		
-		assertEquals(NodeExampleChild.class, base.getPropertyType("property3", false));
-		assertEquals(null, base.getPropertyType("property3", true));
-		
-		base.set("property3", new NodeChildSubclass());
-		
-		assertEquals(NodeExampleChild.class, base.getPropertyType("property3", false));
-		assertEquals(NodeChildSubclass.class, base.getPropertyType("property3", true));
-		
-		PluginManager.initialise(new PluginConfiguration("com.objectgraph"));
-		assertEquals(2, base.getPossiblePropertyValues("property3").size());
+    @Test(expected = PropertyNotExistsException.class)
+    public void testExceptionOnSet() throws Exception {
+        TestBase base = new TestBase();
+        base.set("invalidProperty", "Hello!");
+    }
 
-		Node copy = Node.getKryo().copy(base.property3);
-		assertEquals(3, copy.getFreeProperties().size());
-		assertEquals(2, base.property3.getFreeProperties().size());
-		copy = Node.getKryo().copy(base);
-		assertEquals(2, copy.get("property3", Node.class).getFreeProperties().size());
-	}
+    @Test(expected = PropertyNotExistsException.class)
+    public void testExceptionOnGet() throws Exception {
+        TestBase base = new TestBase();
+        base.get("invalidProperty");
+    }
+
+    @Test
+    public void testGetProperties() throws Exception {
+        TestBase base = new TestBase();
+        assertEquals(Arrays.asList("child", "name"), base.getProperties());
+        TestChild child = new TestChild();
+        assertEquals(Arrays.asList("s", "i"), child.getProperties());
+    }
+
+    @Test
+    public void testGetControlledProperties() throws Exception {
+        TestBase base = new TestBase();
+
+        Trigger trigger = mock(Trigger.class);
+        when(trigger.getControlledPaths()).thenReturn(Arrays.asList("name"));
+        when(trigger.isTriggeredBy(isA(Event.class))).thenReturn(false);
+        when(trigger.getNode()).thenReturn(base);
+
+        base.addTrigger(trigger);
+
+        assertEquals(Arrays.asList("child"), base.getFreeProperties());
+        assertEquals(Arrays.asList("name"), base.getControlledProperties());
+
+        base.removeTrigger(trigger);
+
+        assertTrue(base.getControlledProperties().isEmpty());
+    }
+
+    @Test
+    public void testGetPropertyType() throws Exception {
+        TestBase base = new TestBase();
+        assertEquals(Node.class, base.getPropertyType("child", false));
+        assertEquals(TestChild.class, base.getPropertyType("child", true));
+        assertEquals(String.class, base.getPropertyType("name", false));
+        assertEquals(null, base.getPropertyType("name", true));
+        assertEquals(int.class, base.get("child", TestChild.class).getPropertyType("i", false));
+    }
+
+    public void testGetPossiblePropertyValues() throws Exception {
+
+    }
+
+    @Test
+    public void testGetErrors() throws Exception {
+        TestBase base = new TestBase();
+
+        Error error = new Error(Error.ErrorLevel.WARNING, "Sample error");
+        ErrorCheck check = mock(ErrorCheck.class);
+        when(check.getNode()).thenReturn(base);
+        when(check.getPath()).thenReturn("child.s");
+        when(check.getError()).thenReturn(error);
+
+        base.addErrorCheck(check);
+        TestChild child = new TestChild();
+        base.set("child", child);
+
+        assertEquals(Arrays.asList(check), child.getErrorChecks("s"));
+
+        Map<String,Set<Error>> errors = base.getErrors();
+        assertEquals(Sets.newHashSet("child.s"), errors.keySet());
+        assertEquals(Sets.newHashSet(error), errors.get("child.s"));
+
+        errors = child.getErrors();
+        assertTrue(errors.isEmpty());
+    }
 
 }
