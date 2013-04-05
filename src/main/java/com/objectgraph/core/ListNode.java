@@ -19,8 +19,7 @@
 
 package com.objectgraph.core;
 
-import com.objectgraph.core.eventtypes.changes.ListChange;
-import com.objectgraph.core.eventtypes.changes.ListChange.ListChangeType;
+import com.objectgraph.core.ListChange.ListChangeType;
 
 import java.util.*;
 

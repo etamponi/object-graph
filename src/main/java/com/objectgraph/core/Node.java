@@ -20,7 +20,6 @@
 package com.objectgraph.core;
 
 import com.esotericsoftware.kryo.Kryo;
-import com.objectgraph.core.eventtypes.changes.SetProperty;
 import com.objectgraph.pluginsystem.PluginManager;
 import com.objectgraph.utils.PathUtils;
 import org.objenesis.instantiator.ObjectInstantiator;

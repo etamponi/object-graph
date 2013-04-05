@@ -17,8 +17,30 @@
  * along with object-graph.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.objectgraph.core.eventtypes.changes;
+package com.objectgraph.core;
 
-public class MapChange extends Change {
+public class SetProperty extends Change {
+
+    private final RootedProperty property;
+    private final Object oldContent;
+    private final Object newContent;
+
+    public SetProperty(RootedProperty property, Object oldContent, Object newContent) {
+        this.property = property;
+        this.oldContent = oldContent;
+        this.newContent = newContent;
+    }
+
+    public RootedProperty getProperty() {
+        return property;
+    }
+
+    public Object getOldValue() {
+        return oldContent;
+    }
+
+    public Object getNewValue() {
+        return newContent;
+    }
 
 }

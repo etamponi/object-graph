@@ -58,6 +58,11 @@ public abstract class ErrorCheck<N extends Node, T> extends NodeHelper<N> {
 
     private final String path;
 
+    /**
+     * Instantiate a new ErrorCheck on the given path
+     *
+     * @param path the path that will be checked using {@link #getError()}
+     */
     public ErrorCheck(String path) {
         this.path = path;
     }

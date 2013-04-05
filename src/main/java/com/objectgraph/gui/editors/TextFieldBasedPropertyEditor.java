@@ -20,7 +20,7 @@
 package com.objectgraph.gui.editors;
 
 import com.objectgraph.core.Event;
-import com.objectgraph.core.eventtypes.changes.SetProperty;
+import com.objectgraph.core.SetProperty;
 import com.objectgraph.gui.PropertyEditor;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;

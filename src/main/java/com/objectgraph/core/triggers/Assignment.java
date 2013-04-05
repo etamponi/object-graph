@@ -21,7 +21,7 @@ package com.objectgraph.core.triggers;
 
 import com.objectgraph.core.Event;
 import com.objectgraph.core.Node;
-import com.objectgraph.core.eventtypes.changes.Change;
+import com.objectgraph.core.Change;
 import com.objectgraph.utils.PathUtils;
 
 public class Assignment extends StaticControlledPathTrigger<Node> {

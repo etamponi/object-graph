@@ -17,9 +17,7 @@
  * along with object-graph.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.objectgraph.core.eventtypes.changes;
-
-import com.objectgraph.core.ListNode;
+package com.objectgraph.core;
 
 import java.util.Collections;
 import java.util.List;

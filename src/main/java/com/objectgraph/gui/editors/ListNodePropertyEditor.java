@@ -23,7 +23,7 @@ import com.google.common.collect.Sets;
 import com.objectgraph.core.Event;
 import com.objectgraph.core.ListNode;
 import com.objectgraph.core.RootedProperty;
-import com.objectgraph.core.eventtypes.changes.ListChange;
+import com.objectgraph.core.ListChange;
 import com.objectgraph.gui.EditorManager;
 import com.objectgraph.gui.PropertyEditor;
 import com.objectgraph.utils.PathUtils;

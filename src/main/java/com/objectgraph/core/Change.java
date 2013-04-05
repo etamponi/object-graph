@@ -17,7 +17,7 @@
  * along with object-graph.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.objectgraph.core.eventtypes.changes;
+package com.objectgraph.core;
 
 import com.objectgraph.core.EventType;
 
