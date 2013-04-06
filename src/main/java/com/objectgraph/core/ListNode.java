@@ -23,6 +23,10 @@ import com.objectgraph.core.ListChange.ListChangeType;
 
 import java.util.*;
 
+/**
+ *
+ * @param <E>
+ */
 public class ListNode<E> extends Node implements List<E> {
 
     private final List<E> list = new ArrayList<>();
@@ -31,10 +35,19 @@ public class ListNode<E> extends Node implements List<E> {
 
     private final List<String> properties = new ArrayList<>();
 
+    /**
+     *
+     * @param elementType
+     */
     public ListNode(Class<E> elementType) {
         this.elementType = elementType;
     }
 
+    /**
+     *
+     * @param elementType
+     * @param elements
+     */
     @SafeVarargs
     public ListNode(Class<E> elementType, E... elements) {
         this.elementType = elementType;
@@ -48,7 +61,7 @@ public class ListNode<E> extends Node implements List<E> {
 
     @Override
     public void add(int index, E element) {
-        addAll(list.size(), Collections.singleton(element));
+        addAll(index, Collections.singleton(element));
     }
 
     @Override
@@ -377,6 +390,10 @@ public class ListNode<E> extends Node implements List<E> {
         return list.toString();
     }
 
+    /**
+     *
+     * @return
+     */
     public Class<E> getElementType() {
         return elementType;
     }
