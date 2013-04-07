@@ -29,7 +29,7 @@ public class ListNodeIterator<E> implements ListIterator<E> {
 
     private final ListNode<E> list;
 
-    public ListNodeIterator(ListNode<E> list, ListIterator<E> iterator) {
+    ListNodeIterator(ListNode<E> list, ListIterator<E> iterator) {
         this.list = list;
         this.iterator = iterator;
     }
@@ -38,8 +38,9 @@ public class ListNodeIterator<E> implements ListIterator<E> {
     public void add(E element) {
         int index = iterator.nextIndex();
         iterator.add(element);
-        if (element instanceof Node)
+        if (element instanceof Node) {
             ((Node) element).addParentPath(list, String.valueOf(index));
+        }
 
         for (index = index + 1; index < list.size(); index++) {
             E current = list.get(index);
@@ -91,8 +92,9 @@ public class ListNodeIterator<E> implements ListIterator<E> {
         int index = iterator.nextIndex() - 1;
         E element = list.get(index);
         iterator.remove();
-        if (element instanceof Node)
-            ((Node) element).addParentPath(list, String.valueOf(index));
+        if (element instanceof Node) {
+            ((Node) element).removeParentPath(list, String.valueOf(index));
+        }
 
         for (int i = index; i < list.size(); i++) {
             E current = list.get(i);

@@ -23,10 +23,10 @@ import com.google.common.collect.Sets;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class ListNodeTest2 {
 
@@ -95,17 +95,74 @@ public class ListNodeTest2 {
 
     @Test
     public void testListIterator() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
+        list.add(new TestElement());
+        list.add(new TestElement());
+        list.add(new TestElement());
+        list.add(new TestElement());
 
+        Iterator<TestElement> it = list.listIterator(2);
+        it.next().set("s", "third element");
+        it.next().set("s", "fourth element");
+        assertFalse(it.hasNext());
+
+        it = list.listIterator(1);
+        TestElement removedElement = it.next();
+        assertNull(removedElement.s);
+        it.remove();
+        assertNull(removedElement.getParentPaths().get(list));
+
+        assertEquals("third element", it.next().s);
+
+        it = list.iterator();
+        assertNull(it.next().s);
+        assertEquals("third element", it.next().s);
+        assertEquals("fourth element", it.next().s);
+        assertFalse(it.hasNext());
     }
 
     @Test
     public void testRemove() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
 
+        TestElement element0 = new TestElement();
+        TestElement element1 = new TestElement();
+
+        list.add(element0);
+        list.add(element1);
+
+        assertTrue(list.remove(element0));
+        assertNull(element0.getParentPaths().get(list));
+
+        list.add(0, element0);
+
+        list.remove(1);
+        assertNull(element1.getParentPaths().get(list));
     }
 
     @Test
     public void testRemoveAll() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
 
+        TestElement aElement = new TestElement();
+        TestElement repeated = new TestElement();
+        TestElement another = new TestElement();
+        TestElement remains = new TestElement();
+
+        list.add(aElement);
+        list.add(remains);
+        list.add(another);
+        list.add(repeated);
+        list.add(repeated);
+        list.add(remains);
+
+        list.removeAll(Arrays.asList(aElement, another, repeated));
+
+        assertNull(aElement.getParentPaths().get(list));
+        assertNull(another.getParentPaths().get(list));
+        assertNull(repeated.getParentPaths().get(list));
+
+        assertEquals(Sets.newHashSet("0", "1"), remains.getParentPaths().get(list));
     }
 
     @Test
