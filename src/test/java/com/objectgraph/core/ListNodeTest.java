@@ -19,131 +19,269 @@
 
 package com.objectgraph.core;
 
-import com.objectgraph.core.ListChange.ListChangeType;
-import com.objectgraph.utils.StringList;
+import com.google.common.collect.Sets;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class ListNodeTest {
-	
-	public static class Example extends ObjectNode {
-		@Property
-		protected ListNode<String> list1 = new ListNode<>(String.class);
-		@Property
-		protected ListNode<Element> list2 = new ListNode<>(Element.class);
-		@Property
-		protected String property1;
-		
-		public Example() {
-			initialiseNode();
-			addTrigger(new Trigger<Example>() {
 
-				@Override
-				public List<String> getControlledPaths() {
-					return new StringList("list2.*.property1");
-				}
+    private static class TestElement extends ObjectNode {
+        @Property String s;
+    }
 
-				@Override
-				protected boolean isTriggeredBy(Event event) {
-					if (event.getPath().equals("list1") && event.getType() instanceof ListChange) {
-						ListChange type = (ListChange)event.getType();
-						if (type.getChangeType().equals(ListChangeType.REMOVE)) {
-							return type.getIndices().contains(2);
-						}
-					}
-					return false;
-				}
+    @Test
+    public void testAdd() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
 
-				@Override
-				protected void action(Event event) {
-					getNode().set("list2.*.property1", getNode().get("property1"));
-				}
-			});
-		}
-	}
-	
-	public static class Element extends ObjectNode {
-		@Property
-		protected String property1;
-		@Property
-		protected double property2;
-	}
+        TestElement element0 = new TestElement();
+        list.add(element0);
+        TestElement element1 = new TestElement();
+        list.add(new TestElement());
+        list.add(1, element1);
 
-	@Test
-	public void test() {
-		ListNode<String> list = new ListNode<>(String.class);
-		
-		list.add("Ciao");
-		list.add("Eccoci");
-		
-		assertEquals(new StringList("0", "1"), list.getProperties());
-		
-		list.remove("Ciao");
-		
-		assertEquals(new StringList("0"), list.getProperties());
-		
-		Example object = new Example();
-		
-		object.set("property1", "Automatic");
-		object.set("list1", list);
-		assertEquals("Eccoci", object.get("list1.0"));
-		
-		object.get("list1", ListNode.class).add("Prova");
-		assertEquals("Prova", object.get("list1.1"));
+        assertEquals(Sets.newHashSet("0"), element0.getParentPaths().get(list));
+        assertEquals(Sets.newHashSet("1"), element1.getParentPaths().get(list));
+        assertEquals(Sets.newHashSet("2"), list.get(2).getParentPaths().get(list));
 
-		object.get("list2", ListNode.class).add(new Element());
-		object.get("list2", ListNode.class).add(new Element());
-		assertEquals(new StringList("property1"), object.get("list2.0", Element.class).getControlledProperties());
-		assertEquals(null, object.get("list2.1.property1"));
-		
-		list.add("ciao");
-		assertEquals(null, object.get("list2.1.property1"));
-		list.remove("ciao");
-		assertEquals("Automatic", object.get("list2.1.property1"));
-		
-		assertEquals(new StringList("Automatic", "Automatic"), object.get("list2.*.property1"));
+        TestElement elementMultiple = new TestElement();
 
-		assertEquals(Element.class, object.get("list2", ListNode.class).getPropertyType("1", false));
-		assertEquals(Element.class, object.get("list2", ListNode.class).getPropertyType("1", true));
-	}
-	
-	@Test
-	public void testIterator() {
-		ListNode<String> list = new ListNode<>(String.class, "Test1", "Test2", "Test3");
-		list.addTrigger(new Trigger<ListNode<String>>() {
+        list.add(elementMultiple);
+        list.add(2, elementMultiple);
 
-			@Override
-			public List<String> getControlledPaths() {
-				return Collections.emptyList();
-			}
+        assertEquals(Sets.newHashSet("2", "4"), elementMultiple.getParentPaths().get(list));
+    }
 
-			@Override
-			protected boolean isTriggeredBy(Event event) {
-				return event.getType() instanceof Change;
-			}
+    @Test
+    public void testAddAll() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
 
-			@Override
-			protected void action(Event event) {
-				if (event.getType() instanceof ListChange) {
-					if (!event.getType(ListChange.class).isIndirect())
-						getNode().add("TestAutomatic");
-				}
-			}
-			
-		});
-		ListIterator<String> it = list.listIterator(1);
-		assertEquals("Test2", it.next());
-		it.remove();
-		assertEquals(2, list.size());
-		assertEquals("Test3", it.next());
-		it.add("TestManual");
-		assertEquals(3, list.size());
-		assertEquals("TestManual", list.get(2));
-	}
+        List<TestElement> contents = Arrays.asList(new TestElement(), new TestElement(), new TestElement());
+        contents.get(0).set("s", "content 0");
+        contents.get(1).set("s", "content 1");
+        contents.get(2).set("s", "content 2");
+
+        list.add(new TestElement());
+        list.add(new TestElement());
+
+        list.addAll(1, contents);
+
+        assertEquals("content 0", list.get(1).s);
+        assertEquals("content 1", list.get(2).s);
+        assertEquals("content 2", list.get(3).s);
+        assertEquals(Sets.newHashSet("2"), list.get(2).getParentPaths().get(list));
+        assertEquals(Sets.newHashSet("4"), list.get(4).getParentPaths().get(list));
+    }
+
+    @Test
+    public void testClear() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
+
+        list.add(new TestElement());
+        list.add(new TestElement());
+        list.add(new TestElement());
+        list.add(new TestElement());
+
+        TestElement element = list.get(2);
+
+        list.clear();
+
+        assertNull(element.getParentPaths().get(list));
+    }
+
+    @Test
+    public void testListIterator() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
+        list.add(new TestElement());
+        list.add(new TestElement());
+        list.add(new TestElement());
+        list.add(new TestElement());
+
+        Iterator<TestElement> it = list.listIterator(2);
+        it.next().set("s", "third element");
+        it.next().set("s", "fourth element");
+        assertFalse(it.hasNext());
+
+        it = list.listIterator(1);
+        TestElement removedElement = it.next();
+        assertNull(removedElement.s);
+        it.remove();
+        assertNull(removedElement.getParentPaths().get(list));
+
+        assertEquals("third element", it.next().s);
+
+        it = list.iterator();
+        assertNull(it.next().s);
+        assertEquals("third element", it.next().s);
+        assertEquals("fourth element", it.next().s);
+        assertFalse(it.hasNext());
+    }
+
+    @Test
+    public void testRemove() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
+
+        TestElement element0 = new TestElement();
+        TestElement element1 = new TestElement();
+
+        list.add(element0);
+        list.add(element1);
+
+        assertTrue(list.remove(element0));
+        assertNull(element0.getParentPaths().get(list));
+
+        list.add(0, element0);
+
+        list.remove(1);
+        assertNull(element1.getParentPaths().get(list));
+    }
+
+    @Test
+    public void testRemoveAll() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
+
+        TestElement aElement = new TestElement();
+        TestElement repeated = new TestElement();
+        TestElement another = new TestElement();
+        TestElement remains = new TestElement();
+        TestElement out = new TestElement();
+        list.add(aElement);
+        list.add(remains);
+        list.add(another);
+        list.add(repeated);
+        list.add(repeated);
+        list.add(remains);
+
+        list.removeAll(Arrays.asList(aElement, another, repeated, out));
+
+        assertNull(aElement.getParentPaths().get(list));
+        assertNull(another.getParentPaths().get(list));
+        assertNull(repeated.getParentPaths().get(list));
+
+        assertEquals(Sets.newHashSet("0", "1"), remains.getParentPaths().get(list));
+    }
+
+    @Test
+    public void testRetainAll() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
+
+        TestElement remains = new TestElement();
+        TestElement repeated = new TestElement();
+        TestElement aElement = new TestElement();
+        TestElement another = new TestElement();
+        TestElement out = new TestElement();
+        list.addAll(Arrays.asList(remains, repeated, aElement, repeated, another));
+
+        list.retainAll(Arrays.asList(remains, repeated, out));
+
+        assertNull(aElement.getParentPaths().get(list));
+        assertNull(another.getParentPaths().get(list));
+
+        assertEquals(Sets.newHashSet("0"), remains.getParentPaths().get(list));
+        assertEquals(Sets.newHashSet("1", "2"), repeated.getParentPaths().get(list));
+    }
+
+    @Test
+    public void testSet() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
+
+        TestElement original = new TestElement();
+        TestElement replacement = new TestElement();
+
+        list.add(original);
+        original.set("s", "Original");
+
+        list.set(0, replacement);
+
+        assertNull(original.getParentPaths().get(list));
+        assertEquals(Sets.newHashSet("0"), replacement.getParentPaths().get(list));
+
+        list.set("0.s", "Replacement");
+
+        assertEquals("Replacement", replacement.s);
+        assertEquals("Original", original.s);
+    }
+
+    @Test
+    public void testSetAll() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
+
+        list.add(new TestElement());
+        list.add(new TestElement());
+        list.add(new TestElement());
+
+        list.set("*.s", "Set s for all");
+
+        assertEquals("Set s for all", list.get(0).s);
+        assertEquals("Set s for all", list.get(1).s);
+        assertEquals("Set s for all", list.get(2).s);
+    }
+
+    @Test
+    public void testGetPropertyType() throws Exception {
+        ListNode<Node> list = new ListNode<>(Node.class);
+
+        list.add(null);
+        list.add(new TestElement());
+
+        assertEquals(Node.class, list.getPropertyType("0", false));
+        assertNull(list.getPropertyType("0", true));
+        assertEquals(TestElement.class, list.getPropertyType("1", true));
+        assertEquals(Node.class, list.getPropertyType("1", false));
+    }
+
+    @Test
+    public void testGetAll() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
+
+        list.add(new TestElement());
+        list.add(new TestElement());
+        list.get(0).set("s", "first element");
+        list.get(1).set("s", "second element");
+
+        List<TestElement> getelements = list.get("*");
+        assertEquals("first element", getelements.get(0).s);
+        assertEquals("second element", getelements.get(1).s);
+        assertEquals(list.get(0), getelements.get(0));
+
+        List<String> gets = list.get("*.s");
+        assertEquals("first element", gets.get(0));
+        assertEquals("second element", gets.get(1));
+    }
+
+    @Test
+    public void testTriggers() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
+
+        list.add(new TestElement());
+        list.add(new TestElement());
+
+        Trigger trigger = mock(Trigger.class);
+        doCallRealMethod().when(trigger).setNode(isA(Node.class));
+        when(trigger.getNode()).thenCallRealMethod();
+        when(trigger.getControlledPaths()).thenReturn(Arrays.asList("*.s"));
+        list.addTrigger(trigger);
+
+        assertEquals(Arrays.asList("s"), list.get(0).getControlledProperties());
+        assertEquals(Arrays.asList("s"), list.get(1).getControlledProperties());
+
+        TestElement removed = list.remove(1);
+        assertTrue(removed.getControlledProperties().isEmpty());
+
+        list.get(0).set("s", "Trying to activate the trigger");
+
+        list.removeTrigger(trigger);
+
+        assertTrue(list.get(0).getControlledProperties().isEmpty());
+
+        verify(trigger, times(1)).setNode(list);
+        verify(trigger, times(2)).check(isA(Event.class));
+    }
 
 }
