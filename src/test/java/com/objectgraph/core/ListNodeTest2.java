@@ -21,12 +21,14 @@ package com.objectgraph.core;
 
 import com.google.common.collect.Sets;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class ListNodeTest2 {
 
@@ -187,32 +189,98 @@ public class ListNodeTest2 {
 
     @Test
     public void testSet() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
 
+        TestElement original = new TestElement();
+        TestElement replacement = new TestElement();
+
+        list.add(original);
+        original.set("s", "Original");
+
+        list.set(0, replacement);
+
+        assertNull(original.getParentPaths().get(list));
+        assertEquals(Sets.newHashSet("0"), replacement.getParentPaths().get(list));
+
+        list.set("0.s", "Replacement");
+
+        assertEquals("Replacement", replacement.s);
+        assertEquals("Original", original.s);
     }
 
     @Test
     public void testSetAll() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
 
-    }
+        list.add(new TestElement());
+        list.add(new TestElement());
+        list.add(new TestElement());
 
-    @Test
-    public void testGetElementType() throws Exception {
+        list.set("*.s", "Set s for all");
 
+        assertEquals("Set s for all", list.get(0).s);
+        assertEquals("Set s for all", list.get(1).s);
+        assertEquals("Set s for all", list.get(2).s);
     }
 
     @Test
     public void testGetPropertyType() throws Exception {
+        ListNode<Node> list = new ListNode<>(Node.class);
 
+        list.add(null);
+        list.add(new TestElement());
+
+        assertEquals(Node.class, list.getPropertyType("0", false));
+        assertNull(list.getPropertyType("0", true));
+        assertEquals(TestElement.class, list.getPropertyType("1", true));
+        assertEquals(Node.class, list.getPropertyType("1", false));
     }
 
     @Test
     public void testGetAll() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
 
+        list.add(new TestElement());
+        list.add(new TestElement());
+        list.get(0).set("s", "first element");
+        list.get(1).set("s", "second element");
+
+        List<TestElement> getelements = list.get("*");
+        assertEquals("first element", getelements.get(0).s);
+        assertEquals("second element", getelements.get(1).s);
+        assertEquals(list.get(0), getelements.get(0));
+
+        List<String> gets = list.get("*.s");
+        assertEquals("first element", gets.get(0));
+        assertEquals("second element", gets.get(1));
     }
 
     @Test
     public void testTriggers() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
 
+        list.add(new TestElement());
+        list.add(new TestElement());
+
+        Trigger trigger = mock(Trigger.class);
+        when(trigger.getNode()).thenCallRealMethod();
+        when(trigger.getControlledPaths()).thenReturn(Arrays.asList("*.s"));
+        doCallRealMethod().when(trigger).check(null);
+        list.addTrigger(trigger);
+
+        assertEquals(Arrays.asList("s"), list.get(0).getControlledProperties());
+        assertEquals(Arrays.asList("s"), list.get(1).getControlledProperties());
+
+        TestElement removed = list.remove(1);
+        assertTrue(removed.getControlledProperties().isEmpty());
+
+        list.get(0).set("s", "Trying to activate the trigger");
+
+        verify(trigger, times(1)).action(isA(Event.class));
+
+        list.removeTrigger(trigger);
+
+        assertTrue(list.get(0).getControlledProperties().isEmpty());
     }
 
 }
