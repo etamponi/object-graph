@@ -267,6 +267,10 @@ public class ListNodeTest {
         when(trigger.getControlledPaths()).thenReturn(Arrays.asList("*.s"));
 
         list.addTrigger(trigger);
+        list.get(0).set("s", "Trying to activate the trigger");
+        ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+        verify(trigger, times(1)).check(captor.capture());
+        assertEquals("0.s", captor.getValue().getPath());
 
         assertEquals(Arrays.asList("s"), list.get(0).getControlledProperties());
         assertEquals(Arrays.asList("s"), list.get(1).getControlledProperties());
@@ -274,14 +278,8 @@ public class ListNodeTest {
         TestElement removed = list.remove(1);
         assertTrue(removed.getControlledProperties().isEmpty());
 
-        list.get(0).set("s", "Trying to activate the trigger");
-
-        verify(trigger, times(1)).setNode(list);
-
-        verifyNoMoreInteractions(trigger);
-        ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
-        verify(trigger).check(captor.capture());
-        assertEquals("0.s", captor.getValue().getPath());
+        list.removeTrigger(trigger);
+        assertTrue(list.get(0).getControlledProperties().isEmpty());
     }
 
 }

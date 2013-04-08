@@ -68,7 +68,7 @@ public abstract class Trigger<N extends Node> extends NodeHelper<N> {
      */
     protected abstract void action(Event event);
 
-    final void check(Event event) {
+    void check(Event event) {
         if (listening && isTriggeredBy(event)) {
             listening = false;
             action(event);
