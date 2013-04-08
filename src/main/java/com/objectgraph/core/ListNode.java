@@ -259,7 +259,7 @@ public class ListNode<E> extends Node implements List<E> {
             int index = list.indexOf(element);
             while (index >= 0) {
                 elements.remove(element);
-                indices.remove(index);
+                indices.remove((Object)index);
 
                 int next = list.subList(index + 1, list.size()).indexOf(element);
                 if (next < 0) {

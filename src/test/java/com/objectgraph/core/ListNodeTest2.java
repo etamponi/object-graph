@@ -148,7 +148,7 @@ public class ListNodeTest2 {
         TestElement repeated = new TestElement();
         TestElement another = new TestElement();
         TestElement remains = new TestElement();
-
+        TestElement out = new TestElement();
         list.add(aElement);
         list.add(remains);
         list.add(another);
@@ -156,7 +156,7 @@ public class ListNodeTest2 {
         list.add(repeated);
         list.add(remains);
 
-        list.removeAll(Arrays.asList(aElement, another, repeated));
+        list.removeAll(Arrays.asList(aElement, another, repeated, out));
 
         assertNull(aElement.getParentPaths().get(list));
         assertNull(another.getParentPaths().get(list));
@@ -167,7 +167,22 @@ public class ListNodeTest2 {
 
     @Test
     public void testRetainAll() throws Exception {
+        ListNode<TestElement> list = new ListNode<>(TestElement.class);
 
+        TestElement remains = new TestElement();
+        TestElement repeated = new TestElement();
+        TestElement aElement = new TestElement();
+        TestElement another = new TestElement();
+        TestElement out = new TestElement();
+        list.addAll(Arrays.asList(remains, repeated, aElement, repeated, another));
+
+        list.retainAll(Arrays.asList(remains, repeated, out));
+
+        assertNull(aElement.getParentPaths().get(list));
+        assertNull(another.getParentPaths().get(list));
+
+        assertEquals(Sets.newHashSet("0"), remains.getParentPaths().get(list));
+        assertEquals(Sets.newHashSet("1", "2"), repeated.getParentPaths().get(list));
     }
 
     @Test
