@@ -21,7 +21,7 @@ package com.objectgraph.core;
 
 import com.google.common.collect.Sets;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.mockito.ArgumentCaptor;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -263,9 +263,9 @@ public class ListNodeTest {
         list.add(new TestElement());
 
         Trigger trigger = mock(Trigger.class);
-        doCallRealMethod().when(trigger).setNode(isA(Node.class));
-        when(trigger.getNode()).thenCallRealMethod();
+        when(trigger.getNode()).thenReturn(list);
         when(trigger.getControlledPaths()).thenReturn(Arrays.asList("*.s"));
+
         list.addTrigger(trigger);
 
         assertEquals(Arrays.asList("s"), list.get(0).getControlledProperties());
@@ -276,12 +276,12 @@ public class ListNodeTest {
 
         list.get(0).set("s", "Trying to activate the trigger");
 
-        list.removeTrigger(trigger);
-
-        assertTrue(list.get(0).getControlledProperties().isEmpty());
-
         verify(trigger, times(1)).setNode(list);
-        verify(trigger, times(2)).check(isA(Event.class));
+
+        verifyNoMoreInteractions(trigger);
+        ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+        verify(trigger).check(captor.capture());
+        assertEquals("0.s", captor.getValue().getPath());
     }
 
 }
