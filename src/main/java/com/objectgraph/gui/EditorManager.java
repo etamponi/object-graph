@@ -24,6 +24,10 @@ import com.objectgraph.core.EventRecipient;
 import com.objectgraph.core.Node;
 import com.objectgraph.core.RootedProperty;
 import com.objectgraph.pluginsystem.PluginManager;
+import javafx.event.EventHandler;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.util.*;
 
@@ -35,6 +39,29 @@ public final class EditorManager {
 
     private EditorManager() {
         // Utility class, no instances
+    }
+
+    public static void openBestEditorStage(RootedProperty model, boolean runtime, boolean wait) {
+        PropertyEditor editor = getBestEditor(model, runtime);
+        openEditorStage(editor, model, wait);
+    }
+
+    public static void openEditorStage(final PropertyEditor editor, RootedProperty model, boolean wait) {
+        Stage stage = new Stage();
+
+        stage.setScene(new Scene(editor));
+        editor.attach(model);
+        if (wait) {
+            stage.showAndWait();
+            editor.detach();
+        } else {
+            stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                @Override
+                public void handle(WindowEvent windowEvent) {
+                    editor.detach();
+                }
+            });
+        }
     }
 
     public static PropertyEditor getBestEditor(RootedProperty model, boolean runtime) {

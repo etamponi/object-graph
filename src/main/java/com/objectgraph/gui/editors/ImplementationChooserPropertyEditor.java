@@ -128,16 +128,7 @@ public class ImplementationChooserPropertyEditor extends PropertyEditor {
     }
 
     private void openSpecificEditor() {
-        // TODO Create a specific Stage subclass
-        Stage stage = new Stage();
-
-        PropertyEditor best = EditorManager.getBestEditor(getModel(), true, false);
-        if (best != null) {
-            stage.setScene(new Scene(best));
-            best.attach(getModel());
-            stage.showAndWait();
-            best.detach();
-        }
+        EditorManager.openBestEditorStage(getModel(), true, true);
     }
 
     public void updateModel() {
