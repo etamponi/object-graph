@@ -247,6 +247,31 @@ public class ListNode<E> extends Node implements List<E> {
         }
     }
 
+    public void removeAllIndices(List<Integer> indices) {
+        List<E> elements = new ArrayList<>();
+
+        for (int index: indices) {
+            elements.add(list.get(index));
+        }
+
+        if (!elements.isEmpty()) {
+            for (int index = 0; index < list.size(); index++) {
+                E element = list.get(index);
+                if (element instanceof Node) {
+                    ((Node) element).removeParentPath(this, String.valueOf(index));
+                }
+            }
+
+            for (int index: indices)
+                list.remove(index);
+
+            updatePropertyList();
+            initialiseNode();
+
+            fireEvent(new Event("", new ListChange(ListChangeType.REMOVE, this, elements, indices)));
+        }
+    }
+
     @Override
     public boolean retainAll(Collection<?> c) {
         List<E> elements = new ArrayList<>(list);
