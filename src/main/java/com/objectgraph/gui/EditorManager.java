@@ -49,7 +49,10 @@ public final class EditorManager {
     public static void openEditorStage(final PropertyEditor editor, RootedProperty model, boolean wait) {
         Stage stage = new Stage();
 
-        stage.setScene(new Scene(editor));
+        Scene scene = new Scene(editor);
+        scene.getStylesheets().add("com/objectgraph/gui/objectgraphgui.css");
+
+        stage.setScene(scene);
         editor.attach(model);
         if (wait) {
             stage.showAndWait();
