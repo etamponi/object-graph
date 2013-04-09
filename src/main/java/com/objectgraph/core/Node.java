@@ -429,8 +429,12 @@ public abstract class Node implements EventRecipient {
             if (visited.contains(parent)) {
                 continue;
             }
-            for (String path : getParentPaths().get(parent)) {
-                parent.handleEvent(e.backPropagate(path), visited.plus(parent));
+            try {
+                for (String path : getParentPaths().get(parent)) {
+                    parent.handleEvent(e.backPropagate(path), visited.plus(parent));
+                }
+            } catch (NullPointerException ex) {
+                // This happens because of weak references
             }
         }
     }
