@@ -78,7 +78,7 @@ final class ParentRegistry {
         if (!registry.containsKey(child)) {
             return Collections.emptyMap();
         }
-        return Collections.unmodifiableMap(registry.get(child));
+        return new HashMap<>(registry.get(child));
     }
 
 }
