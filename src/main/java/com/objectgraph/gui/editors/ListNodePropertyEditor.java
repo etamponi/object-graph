@@ -114,10 +114,26 @@ public class ListNodePropertyEditor extends PropertyEditor {
                 deleteElement();
             }
         });
+        MenuItem editElementItem = new MenuItem("Edit in new window");
+        editElementItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                editInNewWindow();
+            }
+        });
 
-        menu.getItems().addAll(addElementItem, deleteElementItem);
+        menu.getItems().addAll(addElementItem, deleteElementItem, editElementItem);
 
         listView.setContextMenu(menu);
+    }
+
+    private void editInNewWindow() {
+        int index = listView.getFocusModel().getFocusedIndex();
+        if (getModel() != null && index >= 0) {
+            ListNode list = getModel().getValue();
+            RootedProperty itemModel = list.getRootedProperty(String.valueOf(index));
+            EditorManager.openBestEditorStage(itemModel, true, false);
+        }
     }
 
     private void deleteElement() {

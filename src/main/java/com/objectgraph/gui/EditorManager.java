@@ -61,6 +61,7 @@ public final class EditorManager {
                     editor.detach();
                 }
             });
+            stage.show();
         }
     }
 
