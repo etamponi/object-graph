@@ -24,6 +24,7 @@ import com.objectgraph.core.*;
 import com.objectgraph.gui.EditorManager;
 import com.objectgraph.gui.PropertyEditor;
 import com.objectgraph.utils.PathUtils;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -51,14 +52,19 @@ public class ListNodePropertyEditor extends PropertyEditor {
 
         @Override
         public void handleEvent(Event e, PSet<EventRecipient> visited) {
-            try {
-                if (itemModel.getValue() != null)
-                    setText(itemModel.getValue().toString());
-                else
-                    setText("<null>");
-            } catch (PropertyNotExistsException ex) {
-                setText("");
-            }
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (itemModel.getValue() != null)
+                            setText(itemModel.getValue().toString());
+                        else
+                            setText("<null>");
+                    } catch (PropertyNotExistsException ex) {
+                        setText("");
+                    }
+                }
+            });
         }
     }
 
@@ -98,10 +104,8 @@ public class ListNodePropertyEditor extends PropertyEditor {
                     @Override
                     public void cancelEdit() {
                         super.cancelEdit();
-                        if (getGraphic() != null) {
+                        if (getGraphic() != viewer) {
                             PropertyEditor editor = (PropertyEditor) getGraphic();
-                            getListView().getItems().set(getIndex(), editor.getModel().getValue());
-                            setText(editor.getModel().getValue().toString());
                             editor.detach();
                             setGraphic(viewer);
                         }

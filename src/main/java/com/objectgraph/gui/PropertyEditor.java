@@ -22,6 +22,7 @@ package com.objectgraph.gui;
 import com.objectgraph.core.Event;
 import com.objectgraph.core.EventRecipient;
 import com.objectgraph.core.RootedProperty;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
@@ -93,12 +94,18 @@ public abstract class PropertyEditor extends AnchorPane implements Initializable
     }
 
     @Override
-    public void handleEvent(Event e, PSet<EventRecipient> visited) {
-        if (listening && requiresViewUpdate(e)) {
-            listening = false;
-            updateView();
-            listening = true;
-        }
+    public void handleEvent(final Event e, PSet<EventRecipient> visited) {
+        // An event can occur in a thread that is not the JavaFX GUI Thread
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if (listening && requiresViewUpdate(e)) {
+                    listening = false;
+                    updateView();
+                    listening = true;
+                }
+            }
+        });
     }
 
 }
