@@ -358,6 +358,7 @@ public abstract class Node implements EventRecipient {
     public List<String> getControlledProperties() {
         List<String> ret = new ArrayList<>();
         getControlledProperties("", ret, HashTreePSet.<Node>singleton(this));
+        Collections.sort(ret);
         return ret;
     }
 
