@@ -38,7 +38,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-public class Prova {
+public class Prova extends Application {
     private static ProvaNode node = new ProvaNode();
 
     public static class ProvaNode extends ObjectNode {
@@ -49,7 +49,7 @@ public class Prova {
         @Property short sh;
         @Property boolean b;
         @Property Node node;
-        @Property ListNode<Node> strings = new ListNode<>(Node.class);
+        @Property ListNode<Node> list = new ListNode<>(Node.class);
 
         public ProvaNode() {
             addConstraint(new Constraint<ProvaNode, Node>("node") {
@@ -88,73 +88,41 @@ public class Prova {
         }
     }
 
-    public static class MyApp extends Application {
-        private static Scene scene;
-        private static VBox box;
+    @Override
+    public void start(Stage stage) throws Exception {
+        PropertyEditor[] editors = {
+                EditorManager.getBestEditor(node.getRootedProperty("s"), false, true),
+                EditorManager.getBestEditor(node.getRootedProperty("node"), false, true),
+                EditorManager.getBestEditor(node.getRootedProperty("i"), false, true),
+                EditorManager.getBestEditor(node.getRootedProperty("d"), false, true),
+                EditorManager.getBestEditor(node.getRootedProperty("f"), false, true),
+                EditorManager.getBestEditor(node.getRootedProperty("sh"), false, true),
+                EditorManager.getBestEditor(node.getRootedProperty("b"), false, true),
+                EditorManager.getBestEditor(node.getRootedProperty("list"), false, true)
+        };
 
-        @Override
-        public void start(Stage stage) throws Exception {
-            AnchorPane pane = new AnchorPane();
-            Button button = new Button("Open");
-            button.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent actionEvent) {
-                    openStage();
-                }
-            });
-            pane.getChildren().add(button);
-            stage.setScene(new Scene(pane));
-            stage.show();
-        }
+        final VBox box = new VBox();
+        Button test = new Button("Automatic");
+        test.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                node.set("s", "Automatic message");
+            }
+        });
+        box.getChildren().addAll(test);
+        box.getChildren().addAll(editors);
 
-        private void openStage() {
-            Stage stage = new Stage();
-            PropertyEditor editor1 = new StringPropertyEditor().attach(node.getRootedProperty("s"));
-            PropertyEditor[] editors = {
-                    EditorManager.getBestEditor(node.getRootedProperty("i"), false, true),
-                    EditorManager.getBestEditor(node.getRootedProperty("d"), false, true),
-                    EditorManager.getBestEditor(node.getRootedProperty("f"), false, true),
-                    EditorManager.getBestEditor(node.getRootedProperty("sh"), false, true),
-                    EditorManager.getBestEditor(node.getRootedProperty("b"), false, true),
-                    EditorManager.getBestEditor(node.getRootedProperty("strings"), false, true)
-            };
-            PropertyEditor editor3 = new ImplementationChooserPropertyEditor().attach(node.getRootedProperty("node"));
+        Scene scene = new Scene(box);
+        scene.getStylesheets().add("com/objectgraph/gui/objectgraphgui.css");
 
-            box = new VBox();
-            Button test = new Button("Automatic");
-            test.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    node.set("s", "Automatic message");
-                }
-            });
-            box.getChildren().addAll(editor1, editor3, test);
-            box.getChildren().addAll(editors);
-
-            scene = new Scene(box);
-            scene.getStylesheets().add("com/objectgraph/gui/objectgraphgui.css");
-
-            stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-                @Override
-                public void handle(WindowEvent windowEvent) {
-                    box.getChildren().clear();
-                    box = null;
-                }
-            });
-
-            stage.setScene(scene);
-            stage.showAndWait();
-        }
-    }
-
-    public static void provaParent(ProvaNode node) {
-        new ProvaParent().set("child", node);
+        stage.setScene(scene);
+        stage.show();
     }
 
     public static void main(String[] args) throws Exception {
         PluginManager.initialise(new PluginConfiguration("com.objectgraph"));
 
-        Application.launch(MyApp.class);
+        launch(args);
     }
 
 }
