@@ -21,7 +21,6 @@ package com.objectgraph.gui.editors;
 
 import com.google.common.collect.Sets;
 import com.objectgraph.core.Event;
-import com.objectgraph.core.RootedProperty;
 import com.objectgraph.gui.PropertyEditor;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -70,8 +69,7 @@ public class BooleanPropertyEditor extends PropertyEditor {
     }
 
     @Override
-    public boolean canEdit(RootedProperty model) {
-        Class<?> type = model.getValueType(true);
+    public boolean canEdit(Class<?> type) {
         return type == boolean.class || type == Boolean.class;
     }
 

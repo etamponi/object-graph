@@ -19,8 +19,6 @@
 
 package com.objectgraph.gui.editors;
 
-import com.objectgraph.core.RootedProperty;
-
 import java.util.Collections;
 import java.util.Set;
 
@@ -41,8 +39,8 @@ public class StringPropertyEditor extends TextFieldBasedPropertyEditor<String> {
     }
 
     @Override
-    public boolean canEdit(RootedProperty model) {
-        return model.getValueType(false).equals(String.class);
+    public boolean canEdit(Class<?> valueType) {
+        return valueType == String.class;
     }
 
     @Override

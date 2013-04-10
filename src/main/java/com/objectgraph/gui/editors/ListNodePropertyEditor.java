@@ -23,6 +23,7 @@ import com.google.common.collect.Sets;
 import com.objectgraph.core.*;
 import com.objectgraph.gui.EditorManager;
 import com.objectgraph.gui.PropertyEditor;
+import com.objectgraph.utils.ClassUtils;
 import com.objectgraph.utils.PathUtils;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -89,6 +90,9 @@ public class ListNodePropertyEditor extends PropertyEditor {
             @Override
             public ListCell call(ListView listView) {
                 ListCell cell = new ListCell() {
+                    {
+                        setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+                    }
                     ListItemViewer viewer = new ListItemViewer();
                     @Override
                     public void startEdit() {
@@ -96,7 +100,8 @@ public class ListNodePropertyEditor extends PropertyEditor {
                         if (getModel() != null && getGraphic() == viewer) {
                             ListNode list = getModel().getValue();
                             RootedProperty itemModel = list.getRootedProperty(String.valueOf(getIndex()));
-                            PropertyEditor editor = EditorManager.getBestEditor(itemModel, true, true);
+                            PropertyEditor editor = EditorManager.getBestEditor(itemModel, false, true);
+                            setManaged(false);
                             setGraphic(editor);
                         }
                     }
@@ -107,6 +112,7 @@ public class ListNodePropertyEditor extends PropertyEditor {
                         if (getGraphic() != viewer) {
                             PropertyEditor editor = (PropertyEditor) getGraphic();
                             editor.detach();
+                            setManaged(true);
                             setGraphic(viewer);
                         }
                     }
@@ -162,7 +168,7 @@ public class ListNodePropertyEditor extends PropertyEditor {
         if (getModel() != null && index >= 0) {
             ListNode list = getModel().getValue();
             RootedProperty itemModel = list.getRootedProperty(String.valueOf(index));
-            EditorManager.openBestEditorStage(itemModel, true, false);
+            EditorManager.openBestEditorStage(itemModel, false, false);
         }
     }
 
@@ -179,8 +185,13 @@ public class ListNodePropertyEditor extends PropertyEditor {
             ListNode list = getModel().getValue();
             Class<?> elementType = list.getElementType();
             try {
-                list.add(elementType.newInstance());
-                listView.getSelectionModel().selectLast();
+                if (ClassUtils.isConcrete(elementType)) {
+                    list.add(elementType.newInstance());
+                    //listView.edit(list.size()-1);
+                } else {
+                    list.add(null);
+                    //listView.edit(list.size()-1);
+                }
             } catch (InstantiationException | IllegalAccessException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
@@ -206,8 +217,8 @@ public class ListNodePropertyEditor extends PropertyEditor {
     }
 
     @Override
-    public boolean canEdit(RootedProperty model) {
-        return model.getValue() instanceof ListNode;
+    public boolean canEdit(Class<?> valueType) {
+        return valueType != null && ListNode.class.isAssignableFrom(valueType);
     }
 
     @Override

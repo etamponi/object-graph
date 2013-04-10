@@ -43,7 +43,9 @@ public final class EditorManager {
 
     public static void openBestEditorStage(RootedProperty model, boolean runtime, boolean wait) {
         PropertyEditor editor = getBestEditor(model, runtime);
-        openEditorStage(editor, model, wait);
+        if (editor != null) {
+            openEditorStage(editor, model, wait);
+        }
     }
 
     public static void openEditorStage(final PropertyEditor editor, RootedProperty model, boolean wait) {
@@ -77,7 +79,7 @@ public final class EditorManager {
 
         if (cachedEditors.containsKey(valueType)) {
             PropertyEditor cached = instantiateEditor(cachedEditors.get(valueType));
-            if (cached.canEdit(model)) {
+            if (cached.canEdit(model.getValueType(runtime))) {
                 return attach ? cached.attach(model) : cached;
             }
         }
@@ -87,7 +89,7 @@ public final class EditorManager {
         PropertyEditor best = null;
         while (it.hasNext()) {
             PropertyEditor e = it.next();
-            if (e.canEdit(model)) {
+            if (e.canEdit(model.getValueType(runtime))) {
                 best = updateBestEditor(valueType, best, e);
             }
         }
@@ -118,8 +120,12 @@ public final class EditorManager {
     }
 
     private static PropertyEditor updateBestEditor(Class<?> valueType, PropertyEditor current, PropertyEditor candidate) {
+        if (current == null) {
+            return candidate;
+        }
+
         double candidateDistance = distance(valueType, candidate.getBaseEditableTypes());
-        double currentDistance = current == null ? Double.POSITIVE_INFINITY : distance(valueType, current.getBaseEditableTypes());
+        double currentDistance = distance(valueType, current.getBaseEditableTypes());
         if (currentDistance > candidateDistance) {
             return candidate;
         } else {

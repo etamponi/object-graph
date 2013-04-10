@@ -59,7 +59,7 @@ public abstract class PropertyEditor extends AnchorPane implements Initializable
             return this;
         }
 
-        if (!canEdit(model)) {
+        if (!canEdit(model.getValueType(false)) && !canEdit(model.getValueType(true))) {
             throw new InvalidModelForEditorException();
         }
         if (this.model != null) {
@@ -85,7 +85,7 @@ public abstract class PropertyEditor extends AnchorPane implements Initializable
 
     public abstract void updateView();
 
-    public abstract boolean canEdit(RootedProperty model);
+    public abstract boolean canEdit(Class<?> valueType);
 
     public abstract Set<Class<?>> getBaseEditableTypes();
 

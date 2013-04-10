@@ -20,7 +20,6 @@
 package com.objectgraph.gui.editors;
 
 import com.google.common.collect.Sets;
-import com.objectgraph.core.RootedProperty;
 
 import java.util.Set;
 
@@ -64,8 +63,8 @@ public class NumberPropertyEditor extends TextFieldBasedPropertyEditor<Number> {
             long.class, Long.class, float.class, Float.class, double.class, Double.class);
 
     @Override
-    public boolean canEdit(RootedProperty model) {
-        return supported.contains(model.getValueType(true));
+    public boolean canEdit(Class<?> valueType) {
+        return supported.contains(valueType);
     }
 
     @Override

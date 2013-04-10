@@ -20,7 +20,6 @@
 package com.objectgraph.gui.editors;
 
 import com.objectgraph.core.Event;
-import com.objectgraph.core.RootedProperty;
 import com.objectgraph.core.SetProperty;
 import com.objectgraph.gui.EditorManager;
 import com.objectgraph.gui.PropertyEditor;
@@ -30,12 +29,10 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.stage.Stage;
 import javafx.util.Callback;
 
 import java.net.URL;
@@ -159,34 +156,36 @@ public class ImplementationChooserPropertyEditor extends PropertyEditor {
 
     @Override
     public boolean requiresViewUpdate(Event event) {
-        if (event.getType() instanceof SetProperty) {
-            if (event.getPath().equals(getModel().getPath())) {
-                if (implementationBox.getSelectionModel().getSelectedIndex() != 0) {
-                    return true;
-                }
-                Object currentInView = implementationBox.getValue();
-                currentInView = currentInView == NULLCONTENT ? null : currentInView;
-                Object currentInModel = getModel().getValue();
-                if (currentInView != currentInModel) {
-                    return true;
+        if (getModel() != null) {
+            if (event.getType() instanceof SetProperty) {
+                if (event.getPath().equals(getModel().getPath())) {
+                    if (implementationBox.getSelectionModel().getSelectedIndex() != 0) {
+                        return true;
+                    }
+                    Object currentInView = implementationBox.getValue();
+                    currentInView = currentInView == NULLCONTENT ? null : currentInView;
+                    Object currentInModel = getModel().getValue();
+                    if (currentInView != currentInModel) {
+                        return true;
+                    }
                 }
             }
-        }
-        List<?> possibleValues = getModel().getPossibleValues();
-        if (possibleValues.size() != implementations.size()) {
-            return true;
-        }
-        for (int i = 0; i < possibleValues.size(); i++) {
-            if (!possibleValues.get(i).getClass().equals(implementations.get(i).getClass())) {
+            List<?> possibleValues = getModel().getPossibleValues();
+            if (possibleValues.size() != implementations.size()) {
                 return true;
+            }
+            for (int i = 0; i < possibleValues.size(); i++) {
+                if (!possibleValues.get(i).getClass().equals(implementations.get(i).getClass())) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
     @Override
-    public boolean canEdit(RootedProperty model) {
-        return !ClassUtils.isConcrete(model.getValueType(false));
+    public boolean canEdit(Class<?> valueType) {
+        return valueType != null && !ClassUtils.isConcrete(valueType);
     }
 
     @Override

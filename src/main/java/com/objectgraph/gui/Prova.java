@@ -49,7 +49,7 @@ public class Prova {
         @Property short sh;
         @Property boolean b;
         @Property Node node;
-        @Property ListNode<String> strings = new ListNode<>(String.class);
+        @Property ListNode<Node> strings = new ListNode<>(Node.class);
 
         public ProvaNode() {
             addConstraint(new Constraint<ProvaNode, Node>("node") {
