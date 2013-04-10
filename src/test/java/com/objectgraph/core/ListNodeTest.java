@@ -92,6 +92,7 @@ public class ListNodeTest {
 
         list.clear();
 
+        assertTrue(list.isEmpty());
         assertNull(element.getParentPaths().get(list));
     }
 
@@ -134,6 +135,7 @@ public class ListNodeTest {
         list.add(element1);
 
         assertTrue(list.remove(element0));
+        assertFalse(list.contains(element0));
         assertNull(element0.getParentPaths().get(list));
 
         list.add(0, element0);
@@ -160,9 +162,15 @@ public class ListNodeTest {
 
         list.removeAll(Arrays.asList(aElement, another, repeated, out));
 
+        assertFalse(list.contains(aElement));
+        assertFalse(list.contains(another));
+        assertFalse(list.contains(repeated));
+
         assertNull(aElement.getParentPaths().get(list));
         assertNull(another.getParentPaths().get(list));
         assertNull(repeated.getParentPaths().get(list));
+
+        assertTrue(list.contains(remains));
 
         assertEquals(Sets.newHashSet("0", "1"), remains.getParentPaths().get(list));
     }
@@ -180,6 +188,10 @@ public class ListNodeTest {
 
         list.retainAll(Arrays.asList(remains, repeated, out));
 
+        assertFalse(list.contains(aElement));
+        assertFalse(list.contains(another));
+        assertTrue(list.contains(repeated));
+        assertTrue(list.contains(remains));
         assertNull(aElement.getParentPaths().get(list));
         assertNull(another.getParentPaths().get(list));
 

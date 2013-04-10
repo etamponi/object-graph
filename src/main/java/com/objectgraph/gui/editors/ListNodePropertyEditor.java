@@ -166,7 +166,7 @@ public class ListNodePropertyEditor extends PropertyEditor {
         if (getModel() != null) {
             ListNode list = getModel().getValue();
             ObservableList<Integer> selectedIndices = listView.getSelectionModel().getSelectedIndices();
-            list.removeAllIndices(selectedIndices);
+            list.removeIndices(selectedIndices);
         }
     }
 

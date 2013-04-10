@@ -105,23 +105,7 @@ public class ListNode<E> extends Node implements List<E> {
 
     @Override
     public void clear() {
-        List<Integer> indices = new ArrayList<>(list.size());
-        List<E> elements = new ArrayList<>(list);
-        int index = 0;
-        while (!list.isEmpty()) {
-            E element = list.remove(0);
-
-            String path = String.valueOf(index);
-            if (element instanceof Node) {
-                ((Node) element).removeParentPath(this, path);
-            }
-            indices.add(index++);
-        }
-
-        if (!elements.isEmpty()) {
-            updatePropertyList();
-            fireEvent(new Event("", new ListChange(ListChangeType.REMOVE, this, elements, indices)));
-        }
+        retainAll(Collections.emptyList());
     }
 
     @Override
@@ -208,13 +192,11 @@ public class ListNode<E> extends Node implements List<E> {
     @SuppressWarnings("unchecked")
     @Override
     public boolean removeAll(Collection<?> c) {
-        List<E> elements = new ArrayList<>();
         List<Integer> indices = new ArrayList<>();
 
         for (Object element : c) {
             int index = list.indexOf(element);
             while (index >= 0) {
-                elements.add((E) element);
                 indices.add(index);
 
                 int next = list.subList(index + 1, list.size()).indexOf(element);
@@ -226,56 +208,42 @@ public class ListNode<E> extends Node implements List<E> {
             }
         }
 
-        if (!elements.isEmpty()) {
-            for (int index = 0; index < list.size(); index++) {
-                E element = list.get(index);
-                if (element instanceof Node) {
-                    ((Node) element).removeParentPath(this, String.valueOf(index));
-                }
-            }
+        removeIndices(indices);
+        return !indices.isEmpty();
+   }
 
-            list.removeAll(c);
-
-            updatePropertyList();
-            initialiseNode();
-
-            fireEvent(new Event("", new ListChange(ListChangeType.REMOVE, this, elements, indices)));
-
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public void removeAllIndices(List<Integer> indices) {
+    public void removeIndices(List<Integer> indices) {
+        Collections.sort(indices);
         List<E> elements = new ArrayList<>();
 
         for (int index: indices) {
             elements.add(list.get(index));
         }
 
-        if (!elements.isEmpty()) {
-            for (int index = 0; index < list.size(); index++) {
-                E element = list.get(index);
-                if (element instanceof Node) {
-                    ((Node) element).removeParentPath(this, String.valueOf(index));
-                }
+        // Remove all paths to this in the parent map of the elements, because they could be invalid
+        for (int index = 0; index < list.size(); index++) {
+            E element = list.get(index);
+            if (element instanceof Node) {
+                ((Node) element).removeParentPath(this, String.valueOf(index));
             }
-
-            for (int index: indices)
-                list.remove(index);
-
-            updatePropertyList();
-            initialiseNode();
-
-            fireEvent(new Event("", new ListChange(ListChangeType.REMOVE, this, elements, indices)));
         }
+
+        int count = 0;
+        for(int index: indices) {
+            list.remove(index - count);
+            count++;
+        }
+
+        updatePropertyList();
+        // Now we can assign valid parent paths to elements
+        initialiseNode();
+
+        fireEvent(new Event("", new ListChange(ListChangeType.REMOVE, this, elements, indices)));
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        List<E> elements = new ArrayList<>(list);
-        List<Integer> indices = new ArrayList<>(list.size());
+        List<Integer> indices = new  ArrayList<>(list.size());
         for (int i = 0; i < list.size(); i++) {
             indices.add(i);
         }
@@ -283,7 +251,6 @@ public class ListNode<E> extends Node implements List<E> {
         for (Object element : c) {
             int index = list.indexOf(element);
             while (index >= 0) {
-                elements.remove(element);
                 indices.remove((Object)index);
 
                 int next = list.subList(index + 1, list.size()).indexOf(element);
@@ -295,26 +262,9 @@ public class ListNode<E> extends Node implements List<E> {
             }
         }
 
-        if (!elements.isEmpty()) {
-            for (int index = 0; index < list.size(); index++) {
-                E element = list.get(index);
-                if (element instanceof Node) {
-                    ((Node) element).removeParentPath(this, String.valueOf(index));
-                }
-            }
-
-            list.retainAll(c);
-
-            updatePropertyList();
-            initialiseNode();
-
-            fireEvent(new Event("", new ListChange(ListChangeType.REMOVE, this, elements, indices)));
-
-            return true;
-        } else {
-            return false;
-        }
-    }
+        removeIndices(indices);
+        return !indices.isEmpty();
+   }
 
     @Override
     public E set(int index, E element) {
