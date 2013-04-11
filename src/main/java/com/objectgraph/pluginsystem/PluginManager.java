@@ -89,7 +89,7 @@ public final class PluginManager {
         types.add(baseType);
 
         for (Class<? extends T> type : types) {
-            if (ClassUtils.isImplementation(type)) {
+            if (ClassUtils.canBeInstantiated(type)) {
                 try {
                     T obj = type.newInstance();
                     ret.add(obj);

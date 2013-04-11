@@ -59,14 +59,7 @@ public final class PathUtils {
         if ((prefixTokens.length + 1) != pathTokens.length) {
             return false;
         }
-        for (int i = 0; i < prefixTokens.length; i++) {
-            if (prefixTokens[i].equals(ANY) || pathTokens[i].equals(ANY) || prefixTokens[i].equals(pathTokens[i])) {
-                continue;
-            } else {
-                return false;
-            }
-        }
-        return true;
+        return standardPathComparison(prefixTokens, pathTokens, prefixTokens.length);
     }
 
     public static boolean isPrefix(String prefixPath, String fullPath) {
@@ -82,15 +75,7 @@ public final class PathUtils {
         if (prefixTokens.length > pathTokens.length) {
             return false;
         }
-
-        for (int i = 0; i < prefixTokens.length; i++) {
-            if (prefixTokens[i].equals(ANY) || pathTokens[i].equals(ANY) || prefixTokens[i].equals(pathTokens[i])) {
-                continue;
-            } else {
-                return false;
-            }
-        }
-        return true;
+        return standardPathComparison(prefixTokens, pathTokens, prefixTokens.length);
     }
 
     public static boolean samePrefix(String path1, String path2) {
@@ -99,16 +84,8 @@ public final class PathUtils {
         }
         String[] tokens1 = path1.split(SPLITTER);
         String[] tokens2 = path2.split(SPLITTER);
-        int end = Math.min(tokens1.length, tokens2.length);
-        for (int i = 0; i < end; i++) {
-            if (tokens1[i].equals(ANY) || tokens2[i].equals(ANY) || tokens1[i].equals(tokens2[i])) {
-                continue;
-            } else {
-                return false;
-            }
-        }
-        return true;
-    }
+        return standardPathComparison(tokens1, tokens2, Math.min(tokens1.length, tokens2.length));
+   }
 
     public static boolean samePath(String path1, String path2) {
         if (path1.isEmpty()) {
@@ -119,8 +96,12 @@ public final class PathUtils {
         if (tokens1.length != tokens2.length) {
             return false;
         }
-        for (int i = 0; i < tokens1.length; i++) {
-            if (tokens1[i].equals(ANY) || tokens2[i].equals(ANY) || tokens1[i].equals(tokens2[i])) {
+        return standardPathComparison(tokens1, tokens2, tokens1.length);
+    }
+
+    private static boolean standardPathComparison(String[] path1, String[] path2, int l) {
+        for (int i = 0; i < l; i++) {
+            if (path1[i].equals(ANY) || path2[i].equals(ANY) || path1[i].equals(path2[i])) {
                 continue;
             } else {
                 return false;

@@ -464,7 +464,7 @@ public abstract class Node implements EventRecipient {
     @SuppressWarnings("unchecked")
     public <N extends Node> void removeTrigger(Trigger<N> t) {
         if (t.getNode() != this) {
-            throw new NodeHelperUsedByOtherException(t, t.getNode(), this);
+            throw new NodeHelperUsedByOtherException(t, this);
         }
         triggers.remove(t);
         t.setNode(null);
@@ -518,7 +518,7 @@ public abstract class Node implements EventRecipient {
      */
     public void removeErrorCheck(ErrorCheck<?, ?> e) {
         if (e.getNode() != this) {
-            throw new NodeHelperUsedByOtherException(e, e.getNode(), this);
+            throw new NodeHelperUsedByOtherException(e, this);
         }
 
         errorChecks.get(e.getPath()).remove(e);

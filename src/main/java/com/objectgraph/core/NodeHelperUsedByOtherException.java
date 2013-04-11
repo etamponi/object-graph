@@ -27,10 +27,10 @@ public class NodeHelperUsedByOtherException extends RuntimeException {
     private final NodeHelper helper;
     private final Node queryNode, helpedNode;
 
-    public NodeHelperUsedByOtherException(NodeHelper helper, Node helpedNode, Node queryNode) {
+    public NodeHelperUsedByOtherException(NodeHelper helper, Node queryNode) {
         this.helper = helper;
         this.queryNode = queryNode;
-        this.helpedNode = helpedNode;
+        this.helpedNode = helper.getNode();
     }
 
     public NodeHelper getNodeHelper() {

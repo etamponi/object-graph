@@ -26,7 +26,7 @@ public final class ClassUtils {
     private ClassUtils() {
     }
 
-    public static boolean isImplementation(Class<?> type) {
+    public static boolean canBeInstantiated(Class<?> type) {
         return isConcrete(type)
                 && Modifier.isPublic(type.getModifiers())
                 && (type.getEnclosingClass() == null || Modifier.isStatic(type.getModifiers()));

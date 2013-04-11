@@ -189,10 +189,8 @@ public class ListNodePropertyEditor extends PropertyEditor {
                     list.add(elementType.newInstance());
                 } else {
                     list.add(null);
-                    //int index = list.size()-1;
-                    //list.set(index, list.getPossiblePropertyValues(String.valueOf(index)).get(0));
                 }
-                listView.edit(list.size()-1);
+                listView.getSelectionModel().selectLast();
             } catch (InstantiationException | IllegalAccessException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
