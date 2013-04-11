@@ -26,7 +26,6 @@ import com.objectgraph.gui.PropertyEditor;
 import com.objectgraph.utils.ClassUtils;
 import com.objectgraph.utils.PathUtils;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -35,6 +34,7 @@ import javafx.util.Callback;
 import org.pcollections.PSet;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -90,10 +90,10 @@ public class ListNodePropertyEditor extends PropertyEditor {
             @Override
             public ListCell call(ListView listView) {
                 ListCell cell = new ListCell() {
+                    private final ListItemViewer viewer = new ListItemViewer();
                     {
                         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
                     }
-                    ListItemViewer viewer = new ListItemViewer();
                     @Override
                     public void startEdit() {
                         super.startEdit();
@@ -101,7 +101,6 @@ public class ListNodePropertyEditor extends PropertyEditor {
                             ListNode list = getModel().getValue();
                             RootedProperty itemModel = list.getRootedProperty(String.valueOf(getIndex()));
                             PropertyEditor editor = EditorManager.getBestEditor(itemModel, false, true);
-                            setManaged(false);
                             setGraphic(editor);
                         }
                     }
@@ -112,7 +111,6 @@ public class ListNodePropertyEditor extends PropertyEditor {
                         if (getGraphic() != viewer) {
                             PropertyEditor editor = (PropertyEditor) getGraphic();
                             editor.detach();
-                            setManaged(true);
                             setGraphic(viewer);
                         }
                     }
@@ -175,7 +173,7 @@ public class ListNodePropertyEditor extends PropertyEditor {
     private void deleteElement() {
         if (getModel() != null) {
             ListNode list = getModel().getValue();
-            ObservableList<Integer> selectedIndices = listView.getSelectionModel().getSelectedIndices();
+            List<Integer> selectedIndices = new ArrayList<Integer>(listView.getSelectionModel().getSelectedIndices());
             list.removeIndices(selectedIndices);
         }
     }
@@ -187,11 +185,12 @@ public class ListNodePropertyEditor extends PropertyEditor {
             try {
                 if (ClassUtils.isConcrete(elementType)) {
                     list.add(elementType.newInstance());
-                    //listView.edit(list.size()-1);
                 } else {
                     list.add(null);
-                    //listView.edit(list.size()-1);
+                    //int index = list.size()-1;
+                    //list.set(index, list.getPossiblePropertyValues(String.valueOf(index)).get(0));
                 }
+                listView.edit(list.size()-1);
             } catch (InstantiationException | IllegalAccessException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
@@ -211,8 +210,11 @@ public class ListNodePropertyEditor extends PropertyEditor {
     public void updateView() {
         listView.getItems().clear();
         if (getModel() != null) {
-            List content = getModel().getValue();
-            listView.getItems().addAll(content);
+            List<Object> fakeContents = new ArrayList<>();
+            for(int i = 0; i < getModel().getValue(List.class).size(); i++) {
+                fakeContents.add(i);
+            }
+            listView.getItems().addAll(fakeContents);
         }
     }
 
