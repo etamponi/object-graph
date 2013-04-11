@@ -19,18 +19,22 @@
 
 package com.objectgraph.core.triggers;
 
+import com.objectgraph.core.Event;
 import com.objectgraph.core.ObjectNode;
 import org.junit.Test;
 
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 public class DependencyTest {
+
     private static class TestChild extends ObjectNode {
         @Property String text;
         @Property int value;
     }
+
     private static class TestNode extends ObjectNode {
         @Property TestChild child = new TestChild();
         @Property String string;
@@ -58,7 +62,7 @@ public class DependencyTest {
     public void testAction() throws Exception {
         TestNode node = new TestNode();
 
-        Dependency trigger = new Dependency("child.text", "computeText", "string", "number");
+        Dependency trigger = spy(new Dependency("child.text", "computeText", "string", "number"));
 
         node.addTrigger(trigger);
 
@@ -72,6 +76,8 @@ public class DependencyTest {
 
         node.set("child", new TestChild());
         assertEquals("10 times hello!", node.get("child.text"));
+
+        verify(trigger, times(3)).action(isA(Event.class));
     }
 
     @Test
