@@ -58,17 +58,17 @@ public class Dependency extends StaticControlledPathTrigger<Node> {
     @Override
     protected boolean isTriggeredBy(Event event) {
         if (event.getType() instanceof Change) {
-            if (PathUtils.isPrefix(event.getPath(), controlledPath))
+            if (PathUtils.isPrefix(event.getPath(), controlledPath)) {
                 return true;
+            }
 
-            for (String path : parameterPaths)
-                if (PathUtils.samePrefix(event.getPath(), path))
+            for (String path : parameterPaths) {
+                if (PathUtils.samePrefix(event.getPath(), path)) {
                     return true;
-
-            return false;
-        } else {
-            return false;
+                }
+            }
         }
+        return false;
     }
 
     @Override

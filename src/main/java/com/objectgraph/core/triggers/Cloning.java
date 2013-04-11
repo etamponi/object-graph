@@ -36,16 +36,17 @@ public class Cloning extends StaticControlledPathTrigger<Node> {
     @Override
     protected boolean isTriggeredBy(Event event) {
         if (event.getType() instanceof Change) {
-            if (PathUtils.samePrefix(event.getPath(), masterPath))
+            if (PathUtils.samePrefix(event.getPath(), masterPath)) {
                 return true;
+            }
 
-            for (String path : getControlledPaths())
-                if (PathUtils.isPrefix(event.getPath(), path))
+            for (String path : getControlledPaths()) {
+                if (PathUtils.isPrefix(event.getPath(), path)) {
                     return true;
-            return false;
-        } else {
-            return false;
+                }
+            }
         }
+        return false;
     }
 
     @Override

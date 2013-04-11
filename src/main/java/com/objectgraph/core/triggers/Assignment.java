@@ -36,23 +36,25 @@ public class Assignment extends StaticControlledPathTrigger<Node> {
     @Override
     protected boolean isTriggeredBy(Event event) {
         if (event.getType() instanceof Change) {
-            if (PathUtils.isPrefix(event.getPath(), masterPath))
+            if (PathUtils.isPrefix(event.getPath(), masterPath)) {
                 return true;
+            }
 
-            for (String path : getControlledPaths())
-                if (PathUtils.isPrefix(event.getPath(), path))
+            for (String path : getControlledPaths()) {
+                if (PathUtils.isPrefix(event.getPath(), path)) {
                     return true;
-            return false;
-        } else {
-            return false;
+                }
+            }
         }
+        return false;
     }
 
     @Override
     protected void action(Event event) {
         Object content = getNode().get(masterPath);
-        for (String path : getControlledPaths())
+        for (String path : getControlledPaths()) {
             getNode().set(path, content);
+        }
     }
 
 }
