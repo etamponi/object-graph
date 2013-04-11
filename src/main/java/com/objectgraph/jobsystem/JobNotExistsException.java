@@ -23,8 +23,8 @@ public class JobNotExistsException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    public JobNotExistsException(String message) {
-        super(message);
+    public JobNotExistsException(JobNode node, String jobName) {
+        super(jobName + ": no such job in class " + node.getClass());
     }
 
 }

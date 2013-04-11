@@ -53,7 +53,7 @@ public class PausableAsyncTask<V> extends Task<V> implements Pausable {
 
     public PausableAsyncTask(JobNode node, String jobName, Object... params) {
         if (!node.getJobs().contains(jobName))
-            throw new JobNotExistsException(jobName + ": no such job for class " + node.getClass());
+            throw new JobNotExistsException(node, jobName);
         this.node = node;
         this.jobName = jobName;
         this.params = params;

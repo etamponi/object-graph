@@ -32,7 +32,7 @@ public class PausableAsyncService<V> extends Service<V> implements Pausable {
 
     public PausableAsyncService(JobNode node, String jobName, Object... params) {
         if (!node.getJobs().contains(jobName))
-            throw new JobNotExistsException(jobName + ": no such job for class " + node.getClass());
+            throw new JobNotExistsException(node, jobName);
         this.node = node;
         this.jobName = jobName;
         this.params = params;
