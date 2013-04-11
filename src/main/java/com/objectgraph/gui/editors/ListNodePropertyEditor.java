@@ -229,4 +229,9 @@ public class ListNodePropertyEditor extends PropertyEditor {
     public Set<Class<?>> getBaseEditableTypes() {
         return Sets.<Class<?>>newHashSet(ListNode.class);
     }
+
+    public ListView getListView() {
+        return listView;
+    }
+
 }

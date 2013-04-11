@@ -61,6 +61,7 @@ public class ImplementationChooserPropertyEditor extends PropertyEditor {
             super.updateItem(item, empty);
             if (item == NULLCONTENT || item == null || empty) {
                 setText("<null>");
+                // item is set to null to make the next "if" work
                 item = null;
             } else {
                 setText(item.getClass().getSimpleName());

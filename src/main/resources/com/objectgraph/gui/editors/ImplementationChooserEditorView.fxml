@@ -30,7 +30,7 @@
   <children>
     <GridPane id="GridPane" hgap="5.0" vgap="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <children>
-        <ComboBox fx:id="implementationBox" maxWidth="+Infinity" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+        <ComboBox fx:id="implementationBox" GridPane.columnIndex="0" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
           <items>
             <FXCollections fx:factory="observableArrayList">
             </FXCollections>
