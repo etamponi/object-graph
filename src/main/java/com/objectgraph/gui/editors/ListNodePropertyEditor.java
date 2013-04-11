@@ -102,6 +102,7 @@ public class ListNodePropertyEditor extends PropertyEditor {
                             RootedProperty itemModel = list.getRootedProperty(String.valueOf(getIndex()));
                             PropertyEditor editor = EditorManager.getBestEditor(itemModel, false, true);
                             setGraphic(editor);
+                            getStyleClass().add("editing");
                         }
                     }
 
@@ -112,6 +113,7 @@ public class ListNodePropertyEditor extends PropertyEditor {
                             PropertyEditor editor = (PropertyEditor) getGraphic();
                             editor.detach();
                             setGraphic(viewer);
+                            getStyleClass().remove("editing");
                         }
                     }
 
@@ -209,6 +211,8 @@ public class ListNodePropertyEditor extends PropertyEditor {
     @Override
     public void updateView() {
         listView.getItems().clear();
+        // The Model-View-Controller is provided by the Object Graph system, so we just have
+        // to fill the ListView with some fake (not null) content
         if (getModel() != null) {
             List<Object> fakeContents = new ArrayList<>();
             for(int i = 0; i < getModel().getValue(List.class).size(); i++) {
