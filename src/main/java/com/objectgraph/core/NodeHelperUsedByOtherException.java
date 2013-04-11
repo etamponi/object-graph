@@ -19,15 +19,13 @@
 
 package com.objectgraph.core;
 
-import com.objectgraph.core.Node;
-import com.objectgraph.core.NodeHelper;
-
 public class NodeHelperUsedByOtherException extends RuntimeException {
 
     private final NodeHelper helper;
     private final Node queryNode, helpedNode;
 
     public NodeHelperUsedByOtherException(NodeHelper helper, Node queryNode) {
+        super(helper + ": already used by " + helper.getNode() + " but required by " + queryNode);
         this.helper = helper;
         this.queryNode = queryNode;
         this.helpedNode = helper.getNode();

@@ -128,24 +128,7 @@ public abstract class JobNode extends ObjectNode {
         }
     }
 
-    protected void startCycle(int currentRun, int totalRuns) {
-        if (totalRuns <= 0) {
-            totalRuns = 1;
-        }
-        if (currentRun >= totalRuns) {
-            currentRun = totalRuns - 1;
-        }
-        checkForPauseOrInterruption();
-        synchronized (THREAD_JOBS_LOCK) {
-            Thread current = Thread.currentThread();
-            String jobName = current.getStackTrace()[2].getMethodName();
-            int currentLine = current.getStackTrace()[2].getLineNumber();
-            CycleInfo info = getJobInfos().get(jobName).getCycles().get(currentLine).instantiate(currentRun, totalRuns, "");
-            THREAD_JOBS.get(current).getLast().getCurrentCycles().addLast(info);
-        }
-    }
-
-    protected void startCycle(String description, int currentRun, int totalRuns) {
+    protected void startCycle(int currentRun, int totalRuns, String description) {
         if (totalRuns <= 0) {
             totalRuns = 1;
         }
@@ -158,8 +141,8 @@ public abstract class JobNode extends ObjectNode {
         checkForPauseOrInterruption();
         synchronized (THREAD_JOBS_LOCK) {
             Thread current = Thread.currentThread();
-            String jobName = current.getStackTrace()[2].getMethodName();
-            int currentLine = current.getStackTrace()[2].getLineNumber();
+            String jobName = current.getStackTrace()[CALLER_METHOD].getMethodName();
+            int currentLine = current.getStackTrace()[CALLER_METHOD].getLineNumber();
             CycleInfo info = getJobInfos().get(jobName).getCycles().get(currentLine).instantiate(currentRun, totalRuns, description);
             THREAD_JOBS.get(current).getLast().getCurrentCycles().addLast(info);
         }
@@ -175,7 +158,8 @@ public abstract class JobNode extends ObjectNode {
     protected int getProgress() {
         try {
             return getProgress(Thread.currentThread());
-        } catch (TryLaterException e) { /* Can never happen */
+        } catch (TryLaterException e) {
+            // Can never happen
             return -1;
         }
     }

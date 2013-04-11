@@ -19,12 +19,12 @@
 
 package com.objectgraph.core;
 
-public class PropertyNotExistsException extends MalformedPathException {
+public class PropertyNotExistsException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
     public PropertyNotExistsException(Node root, String path) {
-        super(root, path, "No such property");
+        super(path + ": property does not exist in Node " + root);
     }
 
 }

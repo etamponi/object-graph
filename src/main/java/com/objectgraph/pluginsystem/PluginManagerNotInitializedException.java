@@ -20,4 +20,5 @@
 package com.objectgraph.pluginsystem;
 
 public class PluginManagerNotInitializedException extends RuntimeException {
+
 }

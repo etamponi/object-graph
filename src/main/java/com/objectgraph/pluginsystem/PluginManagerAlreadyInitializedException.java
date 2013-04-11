@@ -20,4 +20,5 @@
 package com.objectgraph.pluginsystem;
 
 public class PluginManagerAlreadyInitializedException extends RuntimeException {
+
 }
