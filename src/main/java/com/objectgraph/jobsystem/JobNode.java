@@ -63,8 +63,9 @@ public abstract class JobNode extends ObjectNode {
                 PausableThread thread = (PausableThread) Thread.currentThread();
                 if (!thread.isPaused()) {
                     cleanUp();
+                } else {
+                    thread.waitWhilePaused();
                 }
-                thread.waitWhilePaused();
             } catch (InterruptedException ex) {
                 cleanUp();
             }
@@ -77,8 +78,9 @@ public abstract class JobNode extends ObjectNode {
             try {
                 if (!task.isPaused()) {
                     cleanUp();
+                } else {
+                    task.waitWhilePaused();
                 }
-                task.waitWhilePaused();
             } catch (InterruptedException ex) {
                 cleanUp();
             }

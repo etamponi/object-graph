@@ -31,8 +31,9 @@ public class PausableAsyncService<V> extends Service<V> implements Pausable {
     private PausableAsyncTask<V> currentTask;
 
     public PausableAsyncService(JobNode node, String jobName, Object... params) {
-        if (!node.getJobs().contains(jobName))
+        if (!node.getJobs().contains(jobName)) {
             throw new JobNotExistsException(node, jobName);
+        }
         this.node = node;
         this.jobName = jobName;
         this.params = params;
@@ -40,8 +41,9 @@ public class PausableAsyncService<V> extends Service<V> implements Pausable {
 
     @Override
     public void pause() {
-        if (currentTask == null)
+        if (currentTask == null) {
             throw new IllegalStateException("Cannot pause a service if it is not in RUNNING or SCHEDULED state");
+        }
         currentTask.pause();
     }
 
@@ -52,21 +54,23 @@ public class PausableAsyncService<V> extends Service<V> implements Pausable {
 
     @Override
     public void waitWhilePaused() throws InterruptedException {
-        if (currentTask != null)
+        if (currentTask != null) {
             currentTask.waitWhilePaused();
+        }
     }
 
     @Override
     public void resume() {
-        if (currentTask != null)
+        if (currentTask != null) {
             currentTask.resume();
-        else
+        } else {
             throw new IllegalStateException("Cannot resume a service if it is not paused");
+        }
     }
 
     @Override
     protected Task<V> createTask() {
-        currentTask = new PausableAsyncTask<V>(node, jobName, params);
+        currentTask = new PausableAsyncTask<>(node, jobName, params);
         return currentTask;
     }
 

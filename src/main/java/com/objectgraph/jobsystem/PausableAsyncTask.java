@@ -28,22 +28,6 @@ public class PausableAsyncTask<V> extends Task<V> implements Pausable {
 
     private static final BiMap<Thread, PausableAsyncTask<?>> threadTaskPairs = HashBiMap.create();
 
-    static <V> PausableAsyncTask<V> getTaskFromThread() {
-        return (PausableAsyncTask<V>) threadTaskPairs.get(Thread.currentThread());
-    }
-
-    private static void putThreadTaskPair(Thread t, PausableAsyncTask<?> s) {
-        threadTaskPairs.put(t, s);
-    }
-
-    private static void removeThreadTaskPair(Thread t) {
-        threadTaskPairs.remove(t);
-    }
-
-    private Thread getThreadFromTask() {
-        return threadTaskPairs.inverse().get(this);
-    }
-
     private final JobNode node;
     private final String jobName;
     private final Object[] params;
@@ -52,8 +36,9 @@ public class PausableAsyncTask<V> extends Task<V> implements Pausable {
     private final Object pauseLock = new Object();
 
     public PausableAsyncTask(JobNode node, String jobName, Object... params) {
-        if (!node.getJobs().contains(jobName))
+        if (!node.getJobs().contains(jobName)) {
             throw new JobNotExistsException(node, jobName);
+        }
         this.node = node;
         this.jobName = jobName;
         this.params = params;
@@ -62,8 +47,9 @@ public class PausableAsyncTask<V> extends Task<V> implements Pausable {
     @Override
     public void pause() {
         // TODO should set paused when the task gets actually paused?
-        if (!isRunning())
+        if (!isRunning()) {
             throw new IllegalStateException("Cannot pause a task if it is not in RUNNING or SCHEDULED state");
+        }
         if (!paused && isRunning()) {
             paused = true;
             getThreadFromTask().interrupt();
@@ -99,8 +85,7 @@ public class PausableAsyncTask<V> extends Task<V> implements Pausable {
     protected V call() throws Exception {
         // TODO make observer optional and with custom sleep time
         Thread t = new Thread(new Runnable() {
-            final Thread main = Thread.currentThread();
-
+            private final Thread main = Thread.currentThread();
             @Override
             public void run() {
                 try {
@@ -108,8 +93,7 @@ public class PausableAsyncTask<V> extends Task<V> implements Pausable {
                         try {
                             int progress = JobNode.getProgress(main);
                             PausableAsyncTask.this.updateProgress(progress, 100);
-                        } catch (TryLaterException ex) {
-                        }
+                        } catch (TryLaterException ex) { }
                         Thread.sleep(5);
                     }
                 } catch (InterruptedException ex) { /* stop observer */ }
@@ -118,13 +102,13 @@ public class PausableAsyncTask<V> extends Task<V> implements Pausable {
         try {
             updateProgress(0, 100);
             t.start();
-            PausableAsyncTask.putThreadTaskPair(Thread.currentThread(), PausableAsyncTask.this);
+            putThreadTaskPair(Thread.currentThread(), this);
             MethodAccess access = MethodAccess.get(node.getClass());
             V ret = (V) access.invoke(node, jobName, params);
             updateProgress(100, 100);
             return ret;
         } finally {
-            PausableAsyncTask.removeThreadTaskPair(Thread.currentThread());
+            removeThreadTaskPair(Thread.currentThread());
             t.interrupt();
         }
     }
@@ -150,6 +134,22 @@ public class PausableAsyncTask<V> extends Task<V> implements Pausable {
     protected void succeeded() {
         super.succeeded();
         paused = false;
+    }
+
+    static <V> PausableAsyncTask<V> getTaskFromThread() {
+        return (PausableAsyncTask<V>) threadTaskPairs.get(Thread.currentThread());
+    }
+
+    private static void putThreadTaskPair(Thread t, PausableAsyncTask<?> s) {
+        threadTaskPairs.put(t, s);
+    }
+
+    private static void removeThreadTaskPair(Thread t) {
+        threadTaskPairs.remove(t);
+    }
+
+    private Thread getThreadFromTask() {
+        return threadTaskPairs.inverse().get(this);
     }
 
 }
