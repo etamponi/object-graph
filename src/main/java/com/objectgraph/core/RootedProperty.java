@@ -19,44 +19,63 @@
 
 package com.objectgraph.core;
 
+import com.objectgraph.pluginsystem.PluginManager;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class RootedProperty {
 
     private final WeakReference<Node> root;
-    private final String path;
-    private final List<ErrorCheck<?, ?>> errorChecks;
+    private final String property;
+    private final List<ErrorCheck<?,?>> errorChecks;
 
-    RootedProperty(Node root, String path) {
+    RootedProperty(Node root, String property) {
+        if (!root.hasProperty(property)) {
+            throw new PropertyNotExistsException(root, property);
+        }
+
         this.root = new WeakReference<>(root);
-        this.path = path;
-        errorChecks = root.getErrorChecks(path);
+        this.property = property;
+        errorChecks = root.getErrorChecks(property);
     }
 
     public Node getRoot() {
         return root.get();
     }
 
-    public String getPath() {
-        return path;
+    public String getProperty() {
+        return property;
     }
 
     public <T> T getValue() {
-        return root.get().get(path);
+        return root.get().get(property);
     }
 
     public <T> T getValue(Class<T> type) {
-        return root.get().get(path, type);
+        return root.get().get(property, type);
     }
 
     public void setValue(Object content) {
-        root.get().set(path, content);
+        root.get().set(property, content);
     }
 
     public Class<?> getValueType(boolean runtime) {
-        return root.get().getPropertyType(path, runtime);
+        return root.get().getPropertyType(property, runtime);
+    }
+
+    public List<ErrorCheck<?,?>> getErrorChecks(Error.Level minLevel) {
+        List<ErrorCheck<?,?>> constraints = new ArrayList<>(errorChecks);
+
+        Iterator<ErrorCheck<?,?>> it = constraints.iterator();
+        while(it.hasNext()) {
+            if (it.next().getLevel().ordinal() < minLevel.ordinal())
+                it.remove();
+        }
+
+        return constraints;
     }
 
     public List<Error> getErrors() {
@@ -76,14 +95,14 @@ public class RootedProperty {
 
     public void updateErrorChecks() {
         errorChecks.clear();
-        errorChecks.addAll(root.get().getErrorChecks(path));
+        errorChecks.addAll(root.get().getErrorChecks(property));
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((path == null) ? 0 : path.hashCode());
+        result = prime * result + ((property == null) ? 0 : property.hashCode());
         result = prime * result + ((root == null) ? 0 : root.get().hashCode());
         return result;
     }
@@ -97,10 +116,10 @@ public class RootedProperty {
         if (getClass() != obj.getClass())
             return false;
         RootedProperty other = (RootedProperty) obj;
-        if (path == null) {
-            if (other.path != null)
+        if (property == null) {
+            if (other.property != null)
                 return false;
-        } else if (!path.equals(other.path))
+        } else if (!property.equals(other.property))
             return false;
         if (root == null) {
             if (other.root != null)
@@ -108,10 +127,6 @@ public class RootedProperty {
         } else if (root.get() != other.root.get())
             return false;
         return true;
-    }
-
-    public List<?> getPossibleValues() {
-        return root.get().getPossiblePropertyValues(path);
     }
 
 }

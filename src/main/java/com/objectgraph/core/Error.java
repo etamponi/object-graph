@@ -24,20 +24,20 @@ package com.objectgraph.core;
  */
 public class Error {
 
-    public enum ErrorLevel {
-        WARNING, SEVERE
+    public enum Level {
+        WARNING, INVALID, SEVERE
     }
 
-    public final ErrorLevel level;
+    public final Level level;
 
     public final String message;
 
-    public Error(ErrorLevel level, String message) {
+    public Error(Level level, String message) {
         this.level = level;
         this.message = message;
     }
 
-    public ErrorLevel getLevel() {
+    public Level getLevel() {
         return level;
     }
 
@@ -47,7 +47,7 @@ public class Error {
 
     @Override
     public String toString() {
-        return message + (level == ErrorLevel.WARNING ? " (warning)" : "");
+        return message + (level == Level.WARNING ? " (warning)" : "");
     }
 
 }

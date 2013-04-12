@@ -110,7 +110,7 @@ public abstract class TextFieldBasedPropertyEditor<T> extends PropertyEditor {
     @Override
     public boolean requiresViewUpdate(Event event) {
         if (event.getType() instanceof SetProperty) {
-            if (event.getPath().equals(getModel().getPath())) {
+            if (event.getPath().equals(getModel().getProperty())) {
                 if (!event.getType(SetProperty.class).getNewValue().equals(textField.getText()))
                     return true;
             }

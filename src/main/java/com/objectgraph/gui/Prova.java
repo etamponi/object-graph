@@ -22,6 +22,7 @@ package com.objectgraph.gui;
 
 import com.google.common.base.Strings;
 import com.objectgraph.core.*;
+import com.objectgraph.core.Error;
 import com.objectgraph.core.triggers.Assignment;
 import com.objectgraph.pluginsystem.PluginConfiguration;
 import com.objectgraph.pluginsystem.PluginManager;
@@ -47,25 +48,25 @@ public class Prova extends Application {
         @Property ListNode<Node> list = new ListNode<>(Node.class);
 
         public ProvaNode() {
-            addConstraint(new Constraint<ProvaNode, Node>("node") {
+            addErrorCheck(new ErrorCheck<ProvaNode, Node>(Error.Level.SEVERE, "node") {
                 @Override
-                public Error getError(Node element) {
+                public String getMessage(Node element) {
                     if (Strings.nullToEmpty(getNode().s).equals("Automatic message")) {
                         if (element instanceof ProvaNode)
                             return null;
                         else
-                            return new Error(Error.ErrorLevel.SEVERE, "should be an instance of ProvaNode");
+                            return "should be an instance of ProvaNode";
                     } else
                         return null;
                 }
             });
-            addErrorCheck(new ErrorCheck<Node, Object>("i") {
+            addErrorCheck(new ErrorCheck<Node, Object>(Error.Level.WARNING, "i") {
                 @Override
-                public Error getError(Object value) {
+                public String getMessage(Object value) {
                     if (value == 12)
                         return null;
                     else
-                        return new Error(Error.ErrorLevel.WARNING, "value should be 12");
+                        return "value should be 12";
                 }
             });
             initialiseNode();

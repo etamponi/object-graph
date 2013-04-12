@@ -19,9 +19,9 @@
 
 package com.objectgraph.core.triggers;
 
+import com.objectgraph.core.Change;
 import com.objectgraph.core.Event;
 import com.objectgraph.core.Node;
-import com.objectgraph.core.Change;
 import com.objectgraph.utils.PathUtils;
 
 public class Cloning extends StaticControlledPathTrigger<Node> {

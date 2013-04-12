@@ -19,6 +19,9 @@
 
 package com.objectgraph.core;
 
+import java.util.List;
+import java.util.ListIterator;
+
 /**
  * Base class for the hint-based error system
  * <p/>
@@ -31,8 +34,8 @@ package com.objectgraph.core;
  * things. You want that some hints appear, that help the user fix the errors in the configuration. Perhaps you want to
  * block some actions until the errors are fixed, but in general you don't want to throw exceptions or such things.
  * <p/>
- * In these cases, the hint-based error system may come in your help. By using {@link Node#addErrorCheck(ErrorCheck)} or
- * {@link Node#addConstraint(Constraint)}, you can add error checks to the configuration of the relative Node. For example,
+ * In these cases, the hint-based error system may come in your help. By using {@link Node#addErrorCheck(ErrorCheck)}
+ * you can add error checks to the configuration of the relative Node. For example,
  * consider a {@link ObjectNode} that has a property {@code percent} of type {@code int} and you want that property to stay
  * between 0 and 100. You can do the following:
  * <pre>
@@ -45,7 +48,7 @@ package com.objectgraph.core;
  *     }
  * </pre>
  * This way, you can still set {@code percent} with any integer, but if you invoke {@link com.objectgraph.core.Node#getErrors()},
- * or {@link com.objectgraph.core.RootedProperty#getErrors()} with a {@link RootedProperty} object connected with the "percent"
+ * or {@link RootedProperty#getErrors()} with a {@link RootedProperty} object connected with the "percent"
  * property, you obtain a set (or a map) of configuration errors. You could display it in
  * some way, by either showing it on an list view or by changing the color of the editor, or in any way you want.
  * <p/>
@@ -58,13 +61,16 @@ public abstract class ErrorCheck<N extends Node, T> extends NodeHelper<N> {
 
     private final String path;
 
+    private final Error.Level level;
+
     /**
      * Instantiate a new ErrorCheck on the given path
      *
      * @param path the path that will be checked using {@link #getError()}
      */
-    public ErrorCheck(String path) {
+    public ErrorCheck(Error.Level level, String path) {
         this.path = path;
+        this.level = level;
     }
 
     /**
@@ -77,12 +83,23 @@ public abstract class ErrorCheck<N extends Node, T> extends NodeHelper<N> {
     }
 
     /**
+     *
+     * @return
+     */
+    public Error.Level getLevel() {
+        return level;
+    }
+
+    /**
      * Return the configuration {@link Error} using the current value.
      *
      * @return an {@link Error} instance, or {@code null} if this ErrorCheck shouldn't apply
      */
     public Error getError() {
-        return getError((T) getNode().get(path));
+        T value = getNode().get(getPath());
+        if (value == null)
+            return null;
+        return getError(value);
     }
 
     /**
@@ -93,6 +110,23 @@ public abstract class ErrorCheck<N extends Node, T> extends NodeHelper<N> {
      * @param value the value to check
      * @return an {@link Error} instance, or {@code null} if the error doesn't apply.
      */
-    public abstract Error getError(T value);
+    public Error getError(T value) {
+        return new Error(level, getMessage(value));
+    }
+
+    protected abstract String getMessage(T value);
+
+    /**
+     *
+     * @param list
+     */
+    public void filter(List<T> list) {
+        ListIterator<T> it = list.listIterator();
+        while (it.hasNext()) {
+            T t = it.next();
+            if (getError(t) != null)
+                it.remove();
+        }
+    }
 
 }

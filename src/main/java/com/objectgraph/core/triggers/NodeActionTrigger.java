@@ -20,9 +20,9 @@
 package com.objectgraph.core.triggers;
 
 import com.esotericsoftware.reflectasm.MethodAccess;
+import com.objectgraph.core.Change;
 import com.objectgraph.core.Event;
 import com.objectgraph.core.Node;
-import com.objectgraph.core.Change;
 
 public class NodeActionTrigger<N extends Node> extends StaticControlledPathTrigger<N> {
 

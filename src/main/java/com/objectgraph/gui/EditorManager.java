@@ -19,7 +19,7 @@
 
 package com.objectgraph.gui;
 
-import com.objectgraph.core.Constraint;
+import com.objectgraph.core.ErrorCheck;
 import com.objectgraph.core.EventRecipient;
 import com.objectgraph.core.Node;
 import com.objectgraph.core.RootedProperty;
@@ -33,7 +33,7 @@ import java.util.*;
 
 public final class EditorManager {
 
-    private static final List<PropertyEditor> editors = PluginManager.getImplementations(PropertyEditor.class, Collections.<Constraint<?, ?>>emptyList());
+    private static final List<PropertyEditor> editors = PluginManager.getImplementations(PropertyEditor.class, Collections.<ErrorCheck<?, ?>>emptyList());
     private static final Map<Class<?>, Class<PropertyEditor>> cachedEditors = new HashMap<>();
     private static final Map<Class<?>, Map<Class<?>, Double>> distances = new HashMap<>();
 

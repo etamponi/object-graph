@@ -50,7 +50,7 @@ import java.util.*;
  * each Node, which are activated by a matching event. See below and {@link #addTrigger(Trigger)}.</dd>
  * <p/>
  * <dt>Event handling made easy</dt>
- * <dd>For each Event that gets propagated to this Node, each registered Trigger is requested to check if an action is
+ * <dd>For each Event that gets propagated to this Node, each registered {@link Trigger} is requested to check if an action is
  * required for that event. For example, if you want to bind a property, say {@code c}, to a transformation
  * of two other properties, say {@code a, b}, you can do this by putting the following line in the constructor:
  * <pre>
@@ -83,13 +83,11 @@ public abstract class Node implements EventRecipient {
 
     private final Map<String, Set<ErrorCheck<?, ?>>> errorChecks = new HashMap<>();
 
-    private final Map<String, Set<Constraint<?, ?>>> constraints = new HashMap<>();
-
     private final static Kryo kryo;
 
     static {
         kryo = new Kryo() {
-            InstantiatorStrategy s = new StdInstantiatorStrategy();
+            private InstantiatorStrategy s = new StdInstantiatorStrategy();
             @Override protected ObjectInstantiator newInstantiator(final Class type) {
                 if (Node.class.isAssignableFrom(type)) {
                     return s.newInstantiatorOf(type);
@@ -229,7 +227,7 @@ public abstract class Node implements EventRecipient {
                     ((Node) value).addParentPath(this, path);
                 }
 
-                fireEvent(new Event(path, new SetProperty(new RootedProperty(this, path), oldValue, value)));
+                fireEvent(new Event(path, new SetProperty(getRootedProperty(path), oldValue, value)));
             }
         } else {
             String localProperty = path.substring(0, firstSplit);
@@ -565,76 +563,6 @@ public abstract class Node implements EventRecipient {
     }
 
     /**
-     * Register a new {@link Constraint}
-     *
-     * {@link Constraint}s are a special kind of {@link ErrorCheck}s that can be used by the {@link PluginManager} to
-     * find <i>compatible</i> implementations of a given property. See the documentation of {@link PluginManager} for
-     * further help.
-     *
-     * @param constraint the Constraint to register
-     */
-    @SuppressWarnings("unchecked")
-    public <N extends Node> void addConstraint(Constraint<N, ?> constraint) {
-        // TODO move the Constraint system to the PluginManager
-        constraint.setNode((N) this);
-        if (!constraints.containsKey(constraint.getPath())) {
-            constraints.put(constraint.getPath(), new HashSet<Constraint<?, ?>>());
-        }
-
-        constraints.get(constraint.getPath()).add(constraint);
-        addErrorCheck(constraint);
-    }
-
-    /**
-     * Remove a previously registered {@link Constraint}
-     *
-     * @param constraint the constraint to be removed
-     */
-    public void removeConstraint(Constraint<?, ?> constraint) {
-        removeErrorCheck(constraint);
-
-        constraints.get(constraint.getPath()).remove(constraint);
-        if (constraints.get(constraint.getPath()).isEmpty()) {
-            constraints.remove(constraint.getPath());
-        }
-    }
-
-    /**
-     * Return a list of values compatible with every {@link Constraint} defined for this property in this Node or in its parents.
-     *
-     * @param property the name of the property
-     * @return a {@link List} of newly instantiated objects that can be assigned to the given property
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public List<?> getPossiblePropertyValues(String property) {
-        if (!hasProperty(property)) {
-            throw new PropertyNotExistsException(this, property);
-        }
-
-        List<Constraint<?, ?>> list = new ArrayList<>();
-        getConstraints(property, list, HashTreePSet.<Node>empty());
-
-        return PluginManager.getImplementations(getPropertyType(property, false), list);
-    }
-
-    private void getConstraints(String path, List<Constraint<?, ?>> list, PSet<Node> seen) {
-        for(String constrainedPath: constraints.keySet()) {
-            if (PathUtils.samePath(constrainedPath, path)) {
-                list.addAll(constraints.get(constrainedPath));
-            }
-        }
-
-        for (EventRecipient p : getParentPaths().keySet()) {
-            if (p instanceof Node && !seen.contains(p)) {
-                Node parent = (Node)p;
-                for (String parentPath : getParentPaths().get(parent)) {
-                    parent.getConstraints(PathUtils.appendPath(parentPath, path), list, seen.plus(parent));
-                }
-            }
-        }
-    }
-
-    /**
      * Recursively find all the {@link ErrorCheck}s relative to the given property.
      *
      * This method goes through the graph of the parents and looks for {@link ErrorCheck} whose
@@ -678,10 +606,6 @@ public abstract class Node implements EventRecipient {
      * @return a {@link RootedProperty} object
      */
     public RootedProperty getRootedProperty(String property) {
-        if (!hasProperty(property)) {
-            throw new PropertyNotExistsException(this, property);
-        }
-
         return new RootedProperty(this, property);
     }
 

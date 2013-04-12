@@ -19,8 +19,6 @@
 
 package com.objectgraph.core;
 
-import com.objectgraph.core.EventType;
-
 public class Change extends EventType {
 
 }

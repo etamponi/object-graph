@@ -105,15 +105,11 @@ public class ObjectNodeTest {
         assertEquals(int.class, base.get("child", TestChild.class).getPropertyType("i", false));
     }
 
-    public void testGetPossiblePropertyValues() throws Exception {
-
-    }
-
     @Test
     public void testGetErrors() throws Exception {
         TestBase base = new TestBase();
 
-        Error error = new Error(Error.ErrorLevel.WARNING, "Sample error");
+        Error error = new Error(Error.Level.WARNING, "Sample error");
         ErrorCheck check = mock(ErrorCheck.class);
         when(check.getNode()).thenReturn(base);
         when(check.getPath()).thenReturn("child.s");

@@ -23,6 +23,7 @@ import com.google.common.collect.Sets;
 import com.objectgraph.core.*;
 import com.objectgraph.gui.EditorManager;
 import com.objectgraph.gui.PropertyEditor;
+import com.objectgraph.core.RootedProperty;
 import com.objectgraph.utils.ClassUtils;
 import com.objectgraph.utils.PathUtils;
 import javafx.application.Platform;
@@ -200,7 +201,7 @@ public class ListNodePropertyEditor extends PropertyEditor {
     @Override
     public boolean requiresViewUpdate(Event event) {
         if (event.getType() instanceof ListChange) {
-            return PathUtils.samePath(getModel().getPath(), event.getPath());
+            return PathUtils.samePath(getModel().getProperty(), event.getPath());
         } else {
             return false;
         }

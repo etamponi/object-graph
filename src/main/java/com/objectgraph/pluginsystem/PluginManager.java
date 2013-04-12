@@ -19,8 +19,8 @@
 
 package com.objectgraph.pluginsystem;
 
-import com.objectgraph.core.Constraint;
-import com.objectgraph.core.Node;
+import com.objectgraph.core.*;
+import com.objectgraph.core.Error;
 import com.objectgraph.utils.ClassUtils;
 import javafx.fxml.FXMLLoader;
 import org.reflections.Reflections;
@@ -82,7 +82,7 @@ public final class PluginManager {
         internal = new Reflections(classLoader, packages.toArray(new String[packages.size()]));
     }
 
-    public static <T> List<T> getImplementations(Class<T> baseType, List<Constraint<?, ?>> constraints) {
+    public static <T> List<T> getImplementations(Class<T> baseType, List<ErrorCheck<?, ?>> constraints) {
         List<T> ret = new ArrayList<>();
 
         Set<Class<? extends T>> types = internal.getSubTypesOf(baseType);
@@ -99,7 +99,7 @@ public final class PluginManager {
             }
         }
 
-        for (Constraint<?, ?> c : constraints)
+        for (ErrorCheck<?, ?> c : constraints)
             c.filter((List) ret);
 
         Collections.sort(ret, new Comparator<T>() {
@@ -110,6 +110,10 @@ public final class PluginManager {
         });
 
         return ret;
+    }
+
+    public static List<?> getPossibleValues(RootedProperty model, Error.Level minLevel) {
+        return PluginManager.getImplementations(model.getValueType(false), model.getErrorChecks(minLevel));
     }
 
 

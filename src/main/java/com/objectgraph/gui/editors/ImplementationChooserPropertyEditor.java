@@ -19,10 +19,12 @@
 
 package com.objectgraph.gui.editors;
 
+import com.objectgraph.core.Error;
 import com.objectgraph.core.Event;
 import com.objectgraph.core.SetProperty;
 import com.objectgraph.gui.EditorManager;
 import com.objectgraph.gui.PropertyEditor;
+import com.objectgraph.pluginsystem.PluginManager;
 import com.objectgraph.utils.ClassUtils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -143,7 +145,7 @@ public class ImplementationChooserPropertyEditor extends PropertyEditor {
     @Override
     public void updateView() {
         if (getModel() != null) {
-            implementations = getModel().getPossibleValues();
+            implementations = PluginManager.getPossibleValues(getModel(), Error.Level.SEVERE);
             implementationBox.getItems().clear();
             Object current = getModel().getValue();
             if (current != null) {
@@ -159,7 +161,7 @@ public class ImplementationChooserPropertyEditor extends PropertyEditor {
     public boolean requiresViewUpdate(Event event) {
         if (getModel() != null) {
             if (event.getType() instanceof SetProperty) {
-                if (event.getPath().equals(getModel().getPath())) {
+                if (event.getPath().equals(getModel().getProperty())) {
                     if (implementationBox.getSelectionModel().getSelectedIndex() != 0) {
                         return true;
                     }
@@ -171,7 +173,7 @@ public class ImplementationChooserPropertyEditor extends PropertyEditor {
                     }
                 }
             }
-            List<?> possibleValues = getModel().getPossibleValues();
+            List<?> possibleValues = PluginManager.getPossibleValues(getModel(), Error.Level.SEVERE);
             if (possibleValues.size() != implementations.size()) {
                 return true;
             }

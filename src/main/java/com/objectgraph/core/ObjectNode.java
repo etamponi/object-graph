@@ -72,7 +72,7 @@ import java.util.*;
  * will not be checked when registered, but only if a triggering {@link Event} reaches the Node <i>after</i> the Trigger
  * has been registered.
  * <p/>
- * You can also define {@link ErrorCheck}s and {@link Constraint}s. These are particularly useful when coupled with a GUI
+ * You can also define {@link ErrorCheck}s and {@link com.objectgraph.core.errorchecks.Constraint}s. These are particularly useful when coupled with a GUI
  * or if you have a complex batch execution or a separate configuration file.
  * <p/>
  * For example:
