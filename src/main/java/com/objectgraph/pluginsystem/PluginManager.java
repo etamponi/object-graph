@@ -100,7 +100,7 @@ public final class PluginManager {
         }
 
         for (ErrorCheck<?, ?> c : constraints)
-            c.filter((List) ret);
+            filter((List) ret, c);
 
         Collections.sort(ret, new Comparator<T>() {
             @Override
@@ -114,6 +114,15 @@ public final class PluginManager {
 
     public static List<?> getPossibleValues(RootedProperty model, Error.Level minLevel) {
         return PluginManager.getImplementations(model.getValueType(false), model.getErrorChecks(minLevel));
+    }
+
+    private static <T> void filter(List<T> list, ErrorCheck<?,T> check) {
+        ListIterator<T> it = list.listIterator();
+        while (it.hasNext()) {
+            T t = it.next();
+            if (check.getError(t) != null)
+                it.remove();
+        }
     }
 
 

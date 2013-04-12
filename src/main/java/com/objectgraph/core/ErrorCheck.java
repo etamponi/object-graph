@@ -115,19 +115,11 @@ public abstract class ErrorCheck<N extends Node, T> extends NodeHelper<N> {
         return message == null ? null : new Error(level, message);
     }
 
-    protected abstract String getMessage(T value);
-
     /**
      *
-     * @param list
+     * @param value
+     * @return
      */
-    public void filter(List<T> list) {
-        ListIterator<T> it = list.listIterator();
-        while (it.hasNext()) {
-            T t = it.next();
-            if (getError(t) != null)
-                it.remove();
-        }
-    }
+    protected abstract String getMessage(T value);
 
 }
