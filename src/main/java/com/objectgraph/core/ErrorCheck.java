@@ -111,7 +111,8 @@ public abstract class ErrorCheck<N extends Node, T> extends NodeHelper<N> {
      * @return an {@link Error} instance, or {@code null} if the error doesn't apply.
      */
     public Error getError(T value) {
-        return new Error(level, getMessage(value));
+        String message = getMessage(value);
+        return message == null ? null : new Error(level, message);
     }
 
     protected abstract String getMessage(T value);

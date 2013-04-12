@@ -54,7 +54,7 @@ public class NodeSerializer extends Serializer<Node> {
             Serializer<Node> serializer = new FieldSerializer<>(kryo, original.getClass());
             Node ret = serializer.copy(kryo, original);
             if (root == original) {
-                // Register tree only for the root (should save some work)
+                // Register tree only from the root (should save some work)
                 ParentRegistry.registerTree(ret);
             }
             return ret;
