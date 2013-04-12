@@ -208,7 +208,7 @@ public abstract class Node implements EventRecipient {
      */
     public void set(String path, Object value) {
         if (path.isEmpty()) {
-            throw new MalformedPathException(this, path, "Empty path cannot be set.");
+            throw new RuntimeException("Cannot set an empty path");
         }
 
         int firstSplit = path.indexOf('.');

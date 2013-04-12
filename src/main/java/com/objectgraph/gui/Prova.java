@@ -22,10 +22,7 @@ package com.objectgraph.gui;
 
 import com.google.common.base.Strings;
 import com.objectgraph.core.*;
-import com.objectgraph.core.Error;
 import com.objectgraph.core.triggers.Assignment;
-import com.objectgraph.gui.editors.ImplementationChooserPropertyEditor;
-import com.objectgraph.gui.editors.StringPropertyEditor;
 import com.objectgraph.pluginsystem.PluginConfiguration;
 import com.objectgraph.pluginsystem.PluginManager;
 import javafx.application.Application;
@@ -33,10 +30,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 public class Prova extends Application {
     private static ProvaNode node = new ProvaNode();
